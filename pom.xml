@@ -1,0 +1,179 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+   <modelVersion>4.0.0</modelVersion>
+   <groupId>Chasemaster</groupId>
+   <artifactId>ChasemasterWS</artifactId>
+   <name>ChasemasterWS</name>
+   <version>0.0.1-SNAPSHOT</version>
+   <packaging>war</packaging>
+   
+   <properties>
+      <cxf.version>2.2.3</cxf.version>
+      <spring-version>2.5</spring-version>
+   </properties>
+   
+   <dependencies>
+      <!--
+      <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xercesImpl</artifactId>
+      <version>2.9.1</version>
+      </dependency>
+      -->
+      <!-- Necessary with JDK5 -->
+      <!--
+      <dependency>
+      <groupId>javax.jws</groupId>
+      <artifactId>jsr181-api</artifactId>
+      <version>1.0-MR1</version>
+      </dependency>
+      -->
+      
+      <dependency>
+         <!-- Apache JAX-WS CXF Dependency for WAR and JAX-WS Client-->
+         <groupId>org.apache.cxf</groupId>
+         <artifactId>cxf-rt-frontend-jaxws</artifactId>
+         <version>${cxf.version}</version>
+      </dependency>
+      <dependency>
+         <!-- Apache JAX-WS CXF Dependency for JAX-WS Client-->
+         <groupId>org.apache.cxf</groupId>
+         <artifactId>cxf-rt-transports-http</artifactId>
+         <version>${cxf.version}</version>
+      </dependency>
+        <dependency>
+            <groupId>taglibs</groupId>
+            <artifactId>standard</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>2.2.8</version>
+        </dependency>
+   </dependencies>
+   
+   <build>
+      <finalName>ChasemasterWS</finalName>
+      <!--Directory where the source code is located-->
+      <sourceDirectory>src/main/java</sourceDirectory>
+      
+      <resources>
+         <resource>
+            <!-- Include properties and xml file from src folder-->
+            <directory>src/main/java</directory>
+            <includes>
+               <include>**/*.properties</include>
+               <include>**/*.xml</include>
+            </includes>
+         </resource>
+      </resources>
+      
+      <pluginManagement>
+         <plugins>
+            <plugin>
+               <!-- Plugin for compiling Java code -->
+               <artifactId>maven-compiler-plugin</artifactId>
+               <configuration>
+                  <!-- Java version for compiling the source code-->
+                  <source>6</source>
+                  <target>6</target>
+               </configuration>
+            </plugin>
+            
+            <plugin>
+               <!-- Maven Plugin used to build WAR archive-->
+               <artifactId>maven-war-plugin</artifactId>
+               <version>2.0</version>
+               <configuration>
+                  <!-- Directory for Web application-->
+                  <webappDirectory>webapp</webappDirectory>
+                  <webResources>
+                  </webResources>
+               </configuration>
+            </plugin>
+            <!--
+            <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-war-plugin</artifactId>
+            <configuration>
+            <webXml>webapp/WEB-INF/web.xml</webXml>
+            <webResources>
+            <resource>
+            <directory>webapp/WEB-INF/lib</directory>
+            <targetPath>WEB-INF/lib</targetPath>
+            <includes>
+            <include>**/*.jar</include>
+            </includes>
+            </resource>
+            </webResources>
+            </configuration>
+            </plugin>
+            -->
+            
+            <plugin>
+               <groupId>org.codehaus.mojo</groupId>
+               <artifactId>tomcat-maven-plugin</artifactId>
+               <configuration>
+                  <warFile>target/ChasemasterWS.war</warFile>
+                  <url>http://localhost:8080/manager/html</url>
+                  <username>admin</username>
+                  <password>admin</password>
+               </configuration>
+            </plugin>
+            <!--
+            <plugin>
+               <groupId>org.codehaus.mojo</groupId>
+               <artifactId>jboss-maven-plugin</artifactId>
+               <version>1.5.0</version>
+               <configuration>
+                  <jbossHome>C:\JBoss51\jbdevstudio\jboss-eap\jboss-as</jbossHome>
+                  <serverName>default</serverName>
+                  <fileName>target/mrswebservices.war</fileName>
+               </configuration>
+            </plugin>
+            -->
+            <plugin>
+               <groupId>org.apache.cxf</groupId>
+               <artifactId>cxf-java2ws-plugin</artifactId>
+               <version>${cxf.version}</version>
+               <dependencies>
+                  <dependency>
+                     <groupId>org.apache.cxf</groupId>
+                     <artifactId>cxf-rt-frontend-jaxws</artifactId>
+                     <version>${cxf.version}</version>
+                  </dependency>
+                  <dependency>
+                     <groupId>org.apache.cxf</groupId>
+                     <artifactId>cxf-rt-frontend-simple</artifactId>
+                     <version>${cxf.version}</version>
+                  </dependency>
+               </dependencies>
+               <executions>
+                  <execution>
+                     <id>process-classes</id>
+                     <phase>process-classes</phase>
+                     <configuration>
+                        <className>com.chasemaster.ws.ChasemasterServiceImpl</className>
+                        <outputFile> ${basedir}/src/main/resources/wsdl/ChasemasterService.wsdl</outputFile>
+                        <!-- <outputFile> ${basedir}/webapp/WEB-INF/wsdl/ChasemasterService.wsdl</outputFile> -->
+                        <genWsdl>true</genWsdl>
+                        <verbose>true</verbose>
+                     </configuration>
+                     <goals>
+                        <goal>java2ws</goal>
+                     </goals>
+                  </execution>
+               </executions>
+            </plugin>
+         </plugins>
+      </pluginManagement>
+   </build>   
+</project>
