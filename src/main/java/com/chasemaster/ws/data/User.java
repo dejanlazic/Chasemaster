@@ -1,11 +1,18 @@
 package com.chasemaster.ws.data;
 
+import javax.persistence.Basic;
+import javax.persistence.Entity;
 import javax.xml.bind.annotation.XmlRootElement;
 
+@SuppressWarnings("serial")
+@Entity
 @XmlRootElement(name="User")
-public class User {
+public class User extends AbstractEntity {
+   @Basic
    private String username;
+   @Basic
    private String password;
+   @Basic
    private String email;
    
    public User() {}

@@ -8,9 +8,9 @@
       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
   <!-- Annotation scan -->
-  <!-- context:component-scan base-package="com.chasemaster.ws" / -->
+  <context:annotation-config />
+  <context:component-scan base-package="com.chasemaster.ws" />
   <!-- context:component-scan base-package="com.chasemaster.ws.service" / -->
-  <!-- context:annotation-config / -->
 
   <!-- Spring MVC configuration -->
   <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
