@@ -13,17 +13,17 @@ public abstract class AbstractEntity implements Serializable {
 
    @Id
    @GeneratedValue
-   private Long id;
+   protected Long id;
 
+   @Version
+   private Integer version;
+   
    /*
     * "UUID" and "UID" are Oracle reserved keywords -> "ENTITY_UID"
     * 
     * @Column(name = "ENTITY_UID", unique = true, nullable = false, updatable =
     * false, length = 36) private String uid;
     */
-
-   @Version
-   private Integer version;
 
    public Long getId() {
       return id;

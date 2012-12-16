@@ -18,7 +18,7 @@ public final class Client {
       user.setPassword("Doe");
       user.setEmail("John.Doe");
 
-      boolean retval = cmClient.register(user);
+      String retval = cmClient.register(user);
       System.out.println("retval: " + retval);
    }
 }

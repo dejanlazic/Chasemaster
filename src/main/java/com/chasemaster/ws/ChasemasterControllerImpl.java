@@ -3,12 +3,13 @@ package com.chasemaster.ws;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.beans.factory.annotation.Qualifier;
+//import org.springframework.context.ApplicationContext;
+//import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.chasemaster.ws.data.User;
+import com.chasemaster.ws.data.UserCredentials;
 import com.chasemaster.ws.service.ChasemasterService;
 
 //@WebService(name="ChasemasterService",
@@ -28,18 +29,25 @@ public class ChasemasterControllerImpl implements ChasemasterController {
      this.chasemasterService = chasemasterService;
   }
   
-  public Boolean register(User user) {
-     System.out.println("In ChasemasterController: " + user.getUsername() + ", " + user.getPassword() + ", " + user.getEmail());;
+  public String register(User user) {
+     System.out.println("In ChasemasterController#register: " + user);;
      
      if(chasemasterService == null) {
         System.out.println("In ChasemasterController: chasemasterService is null");
-        return false; // TODO: Return some Fault object
+        return "SYSTEM ERROR: chasemasterService is null"; // TODO: Return some Fault object
      }
      
      return chasemasterService.register(user);
    }
 
-   public String login() {
-      throw new java.lang.UnsupportedOperationException("Not implemented yet");
+   public Response login(UserCredentials userCredentials) {
+      System.out.println("In ChasemasterController#login: " + userCredentials);;
+      
+      if(chasemasterService == null) {
+         System.out.println("In ChasemasterController: chasemasterService is null");
+         return new Response("chasemasterService is null", "SYSTEM ERROR"); // TODO: Return some Fault object
+      }
+      
+      return chasemasterService.login(userCredentials);
    }   
 }

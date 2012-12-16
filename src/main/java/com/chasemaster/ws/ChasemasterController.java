@@ -5,11 +5,12 @@ import javax.jws.WebParam;
 import javax.jws.WebService;
 
 import com.chasemaster.ws.data.User;
+import com.chasemaster.ws.data.UserCredentials;
 
 @WebService
 public interface ChasemasterController {
    @WebMethod
-   public Boolean register(@WebParam(name="user")User user);
-   @WebMethod(operationName = "login")
-   public String login();
+   public String register(@WebParam(name="User")User user);
+   @WebMethod(operationName="login")
+   public Response login(@WebParam(name="UserCredentials")UserCredentials userCredentials);
 }
