@@ -1,18 +1,18 @@
-package com.example.service;
+package com.chasemaster.web.service;
 
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
-import com.example.model.User;
-import com.example.model.UserCredentials;
+import com.chasemaster.web.model.User;
+import com.chasemaster.web.model.UserCredentials;
 
 /*
  * Chasemaster web service client stack (com.chasemaster.ws.client.*)
  * is generated from WSDL by using CXF.
  */
 @Service
-public class WhetherServiceImpl implements WhetherService {
-   private final static Logger logger = Logger.getLogger(WhetherServiceImpl.class);
+public class ChasemasterServiceImpl implements ChasemasterService {
+   private final static Logger logger = Logger.getLogger(ChasemasterServiceImpl.class);
    
    @Override
    public String register(User user) {

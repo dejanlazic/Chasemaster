@@ -48,7 +48,7 @@
                <input type="submit" value="Submit" class="btn" />
             </form:form>                        
              -->
-            <a href="/Chasemaster/Chasemaster/registrationForm">Registration</a>
+            <a href="/Chasemaster/web/registrationForm">Registration</a>
             
             <!-- OUTPUT DATA -->
             

@@ -1,4 +1,4 @@
-package com.example.model;
+package com.chasemaster.web.model;
 
 public class User {
   private Long id;

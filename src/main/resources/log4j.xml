@@ -41,7 +41,7 @@
     </layout>
   </appender>
 
-  <category name="com.example">
+  <category name="com.chasemaster">
     <level value="DEBUG" />
     <appender-ref ref="APP_LOG_FILE" />
   </category>

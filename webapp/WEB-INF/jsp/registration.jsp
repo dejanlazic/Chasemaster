@@ -30,8 +30,7 @@
 
         <!-- INPUT FORM -->
 
-        <form:form method="post" action="register" commandName="user"
-          class="form-vertical">
+        <form:form method="post" action="register" commandName="user" class="form-vertical">
           <!-- 
           <form:label path="id">Id</form:label>
           <form:input path="id" readonly="true"/>

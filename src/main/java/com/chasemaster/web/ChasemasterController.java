@@ -1,4 +1,4 @@
-package com.example.controller;
+package com.chasemaster.web;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.example.model.User;
-import com.example.model.UserCredentials;
-import com.example.service.WhetherService;
+import com.chasemaster.web.model.User;
+import com.chasemaster.web.model.UserCredentials;
+import com.chasemaster.web.service.ChasemasterService;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,11 +17,11 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 @Controller
-public class WhetherController {
-  private final static Logger logger = Logger.getLogger(WhetherController.class);
+public class ChasemasterController {
+  private final static Logger logger = Logger.getLogger(ChasemasterController.class);
 
   @Autowired
-  private WhetherService whetherService;
+  private ChasemasterService chasemasterService;
 
   private List<Map<String, String>> dataList = null;
   private Map<String, String> geoDataMap = null;
@@ -62,10 +62,10 @@ public class WhetherController {
   public String register(@ModelAttribute("user") User user, BindingResult result) {
     logger.debug("In register(): " + user);
 
-    String retval = whetherService.register(user);
+    String retval = chasemasterService.register(user);
     logger.debug("In register(): " + retval);
     
-    return "redirect:/Chasemaster/";
+    return "redirect:/web/";
   }
   
   @RequestMapping(value = "/login", method = RequestMethod.POST)
@@ -73,9 +73,9 @@ public class WhetherController {
     logger.debug("In login(): " + userCredentials);
     //userCredentials = new UserCredentials();
 
-    String retval = whetherService.login(userCredentials);
+    String retval = chasemasterService.login(userCredentials);
     logger.debug("In login(): " + retval);
 
-    return "redirect:/Chasemaster/";
+    return "redirect:/web/";
   }
 }
