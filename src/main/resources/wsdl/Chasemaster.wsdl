@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://ws.chasemaster.com/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1="http://schemas.xmlsoap.org/soap/http" name="ChasemasterControllerImplService" targetNamespace="http://ws.chasemaster.com/">
+  <wsdl:types>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://ws.chasemaster.com/" elementFormDefault="unqualified" targetNamespace="http://ws.chasemaster.com/" version="1.0">
+<xs:element name="Reponse" type="tns:response"/>
+<xs:element name="User" nillable="true" type="xs:anyType"/>
+<xs:element name="login" type="tns:login"/>
+<xs:element name="loginResponse" type="tns:loginResponse"/>
+<xs:element name="register" type="tns:register"/>
+<xs:element name="registerResponse" type="tns:registerResponse"/>
+<xs:complexType name="register">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="User" type="tns:user"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="user">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractEntity">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Username" type="xs:string"/>
+          <xs:element minOccurs="0" name="Password" type="xs:string"/>
+          <xs:element minOccurs="0" name="PasswordConfirmation" type="xs:string"/>
+          <xs:element minOccurs="0" name="EMail" type="xs:string"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+<xs:complexType abstract="true" name="abstractEntity">
+    <xs:sequence/>
+  </xs:complexType>
+<xs:complexType name="registerResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="return" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="login">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="UserCredentials" type="tns:userCredentials"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="userCredentials">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Username" type="xs:string"/>
+      <xs:element minOccurs="0" name="Password" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="loginResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="return" type="tns:response"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="response">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="MessageText" type="xs:string"/>
+      <xs:element minOccurs="0" name="MessageType" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="loginResponse">
+    <wsdl:part element="tns:loginResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="register">
+    <wsdl:part element="tns:register" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="registerResponse">
+    <wsdl:part element="tns:registerResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="login">
+    <wsdl:part element="tns:login" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="ChasemasterController">
+    <wsdl:operation name="register">
+      <wsdl:input message="tns:register" name="register">
+    </wsdl:input>
+      <wsdl:output message="tns:registerResponse" name="registerResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="login">
+      <wsdl:input message="tns:login" name="login">
+    </wsdl:input>
+      <wsdl:output message="tns:loginResponse" name="loginResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="ChasemasterControllerImplServiceSoapBinding" type="tns:ChasemasterController">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="login">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="login">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="loginResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="register">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="register">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="registerResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="ChasemasterControllerImplService">
+    <wsdl:port binding="tns:ChasemasterControllerImplServiceSoapBinding" name="ChasemasterControllerImplPort">
+      <soap:address location="http://localhost:8080/ChasemasterWS/Service"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

@@ -12,7 +12,8 @@
    <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" />
    <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
 
-   <bean id="chasemasterService" class="com.chasemaster.ws.service.ChasemasterServiceImpl"/>                
+   <bean id="chasemasterService" class="com.chasemaster.ws.service.ChasemasterServiceImpl"/>   
+               
    <bean id="chasemasterController" class="com.chasemaster.ws.ChasemasterControllerImpl">
       <property name="chasemasterService" ref="chasemasterService"></property>
    </bean>   

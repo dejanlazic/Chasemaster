@@ -4,12 +4,15 @@
    xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
    id="services" version="2.5">
 
+   <display-name>Chasemaster</display-name>
+   
    <context-param>
       <param-name>contextConfigLocation</param-name>
       <param-value>
         classpath:app-context-core.xml,
-        classpath:app-context-jpa.xml,
+        classpath:app-context-web.xml,
         classpath:app-context-ws.xml,
+        classpath:app-context-jpa.xml,        
         classpath:app-context-security.xml
       </param-value>
    </context-param>
@@ -24,8 +27,27 @@
       <load-on-startup>1</load-on-startup>
    </servlet>
 
+   <servlet>
+      <servlet-name>SpringServlet</servlet-name>
+      <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+      <init-param>
+         <param-name>contextConfigLocation</param-name>
+         <param-value>classpath:app-context-web.xml</param-value>
+      </init-param>
+      <load-on-startup>1</load-on-startup>
+   </servlet>
+
    <servlet-mapping>
       <servlet-name>CXFServlet</servlet-name>
-      <url-pattern>/*</url-pattern>
+      <url-pattern>/ws/*</url-pattern>
    </servlet-mapping>
+   
+   <servlet-mapping>
+      <servlet-name>SpringServlet</servlet-name>
+      <url-pattern>/web/*</url-pattern>
+   </servlet-mapping>
+
+   <welcome-file-list>
+      <welcome-file>index.jsp</welcome-file>
+   </welcome-file-list>   
 </web-app>

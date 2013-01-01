@@ -1,0 +1,86 @@
+* {	
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:10pt;
+	color: black; 
+}
+
+div#main {
+	height:100%;
+	width:50%;
+	margin-left: auto;
+	margin-right: auto;	
+}
+
+
+
+
+
+#grid
+{
+	width: 400px;
+	height: 400px;
+	border: 2pt black solid;
+	overflow: visible;
+	clear:both;
+}
+
+#gridLetters
+{
+	width: 400px;
+	height: 50px;
+	border: 2pt black solid;
+	overflow: visible;
+	clear:both;
+}
+
+.row
+{
+	float: left;
+	overflow: hidden;
+}
+
+.cell
+{
+	float: left;
+	padding: 0px;
+	overflow: hidden;
+	white-space: nowrap;
+	text-align: center;
+	vertical-align: middle;
+	width: 50px;
+	height: 50px;
+	border: 0pt grey solid;
+}
+
+.cellLetters
+{
+	width: 49px;
+	height: 48px;
+	border-right: 1pt black solid;
+}
+
+.cellLettersLast
+{
+	width: 49px;
+	height: 48px;
+	border-right: 0pt black solid;
+}
+
+.black
+{
+	background-color: grey;
+}
+
+.white
+{
+	background-color: white;
+}
+
+.message
+{
+	width: 400px;
+	height: 50px;
+	border: 1pt black solid;
+	background-color: yellow;
+	color: red;
+}
