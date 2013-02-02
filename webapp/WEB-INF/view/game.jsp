@@ -11,7 +11,7 @@
 	<body>
 		<script type="text/javascript">
 			<!-- hide script from older browsers
-				document.write("<h1>Chase Master</h1>");
+				document.write("<h1>Chasemaster</h1>");
 			// end hiding script --> 
 		</script>
 

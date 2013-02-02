@@ -1,0 +1,2 @@
+mgsChess
+http://www.makinggoodsoftware.com/2011/05/16/java-chess-finding-where-a-piece-can-move/

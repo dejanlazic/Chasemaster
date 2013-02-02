@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "userCredentials", propOrder = {
+@XmlType(name = "userCredentials", namespace="client", propOrder = {
     "username",
     "password"
 })

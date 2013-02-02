@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "response", propOrder = {
+@XmlType(name = "response", namespace="client", propOrder = {
     "messageText",
     "messageType"
 })

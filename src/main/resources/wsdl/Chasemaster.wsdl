@@ -110,7 +110,7 @@
   </wsdl:binding>
   <wsdl:service name="ChasemasterControllerImplService">
     <wsdl:port binding="tns:ChasemasterControllerImplServiceSoapBinding" name="ChasemasterControllerImplPort">
-      <soap:address location="http://localhost:8080/ChasemasterWS/Service"/>
+      <soap:address location="http://localhost:8080/Chasemaster/ws/Service"/>
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>

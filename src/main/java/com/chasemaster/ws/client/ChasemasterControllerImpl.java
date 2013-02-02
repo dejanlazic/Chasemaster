@@ -26,7 +26,7 @@ import javax.xml.ws.ResponseWrapper;
                       serviceName = "ChasemasterControllerImplService",
                       portName = "ChasemasterControllerImplPort",
                       targetNamespace = "http://ws.chasemaster.com/",
-                      wsdlLocation = "http://localhost:8080/ChasemasterWS/Service?wsdl",
+                      wsdlLocation = "http://localhost:8080/Chasemaster/ws/Service?wsdl",
                       endpointInterface = "com.chasemaster.ws.ChasemasterController")
                       
 public class ChasemasterControllerImpl implements ChasemasterController {

@@ -10,10 +10,12 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
 
 @SuppressWarnings("serial")
 @Entity
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "user", namespace = "service")
 @XmlRootElement(name="User")
 public class User extends AbstractEntity {
    @Basic

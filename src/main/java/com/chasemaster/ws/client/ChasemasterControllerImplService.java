@@ -22,7 +22,7 @@ import javax.xml.ws.Service;
 
 
 @WebServiceClient(name = "ChasemasterControllerImplService", 
-                  wsdlLocation = "http://localhost:8080/ChasemasterWS/Service?wsdl",
+                  wsdlLocation = "http://localhost:8080/Chasemaster/ws/Service?wsdl",
                   targetNamespace = "http://ws.chasemaster.com/") 
 public class ChasemasterControllerImplService extends Service {
 
@@ -32,9 +32,9 @@ public class ChasemasterControllerImplService extends Service {
     static {
         URL url = null;
         try {
-            url = new URL("http://localhost:8080/ChasemasterWS/Service?wsdl");
+            url = new URL("http://localhost:8080/Chasemaster/ws/Service?wsdl");
         } catch (MalformedURLException e) {
-            System.err.println("Can not initialize the default wsdl from http://localhost:8080/ChasemasterWS/Service?wsdl");
+            System.err.println("Can not initialize the default wsdl from http://localhost:8080/Chasemaster/ws/Service?wsdl");
             // e.printStackTrace();
         }
         WSDL_LOCATION = url;

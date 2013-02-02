@@ -30,7 +30,7 @@ public class ChasemasterControllerImpl implements ChasemasterController {
   }
   
   public String register(User user) {
-     System.out.println("In ChasemasterController#register: " + user);;
+     System.out.println("In ChasemasterController#register: " + user);
      
      if(chasemasterService == null) {
         System.out.println("In ChasemasterController: chasemasterService is null");
@@ -41,7 +41,7 @@ public class ChasemasterControllerImpl implements ChasemasterController {
    }
 
    public Response login(UserCredentials userCredentials) {
-      System.out.println("In ChasemasterController#login: " + userCredentials);;
+      System.out.println("In ChasemasterController#login: " + userCredentials);
       
       if(chasemasterService == null) {
          System.out.println("In ChasemasterController: chasemasterService is null");

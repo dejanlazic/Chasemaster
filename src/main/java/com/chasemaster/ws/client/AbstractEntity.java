@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "abstractEntity")
+@XmlType(name = "abstractEntity", namespace="client")
 @XmlSeeAlso({
     User.class
 })

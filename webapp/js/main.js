@@ -14,13 +14,6 @@ function initAll() {
    document.getElementById("h2").onclick = clickHandler;
 }
 
-function init() {
-   alert("Init()");
-   document.getElementById("message").innerHTML = "E3";
-
-   doConfirm();
-}
-
 function clickHandler() {
    // alert("In clickHandler()");
    document.getElementById("msg").innerHTML = "In clickHandler()";
@@ -78,6 +71,8 @@ function doPrompt() {
 /* AJAX */
 
 function moveHandler(move) {
+  alert("In moveCount: " + moveCount);
+  
    if (moveCount == 0) {
       move1 = move;
       moveCount = 1;
@@ -91,7 +86,9 @@ function moveHandler(move) {
 }
 
 function sendMoves() {
-   var url = "/ChaseMaster/AjaxResponse?move1=" + escape(move1) + "&move2=" + escape(move2);
+   //var url = "/Chasemaster/AjaxResponse?move1=" + escape(move1) + "&move2=" + escape(move2);
+  //var url = "/Chasemaster/web?move1=" + escape(move1) + "&move2=" + escape(move2);
+  var url = "/Chasemaster/web/move";
 
    if (window.XMLHttpRequest) {
       request = new XMLHttpRequest();

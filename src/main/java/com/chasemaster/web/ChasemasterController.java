@@ -76,6 +76,28 @@ public class ChasemasterController {
     String retval = chasemasterService.login(userCredentials);
     logger.debug("In login(): " + retval);
 
-    return "redirect:/web/";
+    //return "redirect:/web/";
+    return "game";
+  }
+
+  @RequestMapping(value = "/move", method = RequestMethod.GET)
+  public String performMovement() {
+    logger.debug("In performMovement()");
+    System.out.println("In performMovement()");
+
+    //String retval = chasemasterService.login(userCredentials);
+
+//    String move1 = request.getParameter("move1");
+//    String move2 = request.getParameter("move2");
+
+//    System.out.println("[" + move1 + ", " + move2 + "]");
+
+    // setup the response
+//    response.setContentType("text/xml");
+//    response.setHeader("Cache-Control", "no-cache");
+//    response.getWriter().write(move1 + ", " + move2);
+    
+    //return "redirect:/web/";
+    return "game";
   }
 }
