@@ -6,17 +6,15 @@ var move2;
 var request;
 
 function initAll() {
-   alert("Click 2 fields in the FIRST row (a1-h1)");
-   // document.getElementById("lbl").innerText = "In initAll()";
-   document.getElementById("msg").innerHTML = "In initAll()";
+   alert("=== Click 2 fields in the FIRST row (a1-h1)");
+   document.getElementById("msg").innerHTML = document.getElementById("msg").value + "In initAll()";
 
-   document.getElementById("h1").onclick = clickHandler;
-   document.getElementById("h2").onclick = clickHandler;
+   //document.getElementById("h1").onclick = clickHandler;
+   //document.getElementById("h2").onclick = clickHandler;
 }
 
 function clickHandler() {
-   // alert("In clickHandler()");
-   document.getElementById("msg").innerHTML = "In clickHandler()";
+   document.getElementById("msg").innerHTML = document.getElementById("msg").value + "<br/>In clickHandler()";
 
    // do some check
    // return false; // to cancel execution
@@ -26,8 +24,6 @@ function clickHandler() {
 
 //check input controls of a comment to be created
 function validateLogin() {
-   //alert("Before validation");
-
    var username = document.getElementById("username");
    var password = document.getElementById("password");
 
@@ -71,7 +67,7 @@ function doPrompt() {
 /* AJAX */
 
 function moveHandler(move) {
-  alert("In moveCount: " + moveCount);
+  document.getElementById("msg").innerHTML = document.getElementById("msg").value + "<br/>In moveHandler()" + moveCount;
   
    if (moveCount == 0) {
       move1 = move;
@@ -80,15 +76,19 @@ function moveHandler(move) {
       move2 = move;
       moveCount = 0;
 
-      alert("In moveHandler(" + move1 + ", " + move2 + ")");
+      document.getElementById("msg").innerHTML = document.getElementById("msg").value + "<br/>In moveHandler(" + move1 + ", " + move2 + ")";
+      
       sendMoves();
    }
 }
 
 function sendMoves() {
+  //alert("In sendMoves(" + move1 + ", " + move2 + ")");
+  document.getElementById("msg").innerHTML = document.getElementById("msg").value + "<br/>In sendMoves(" + move1 + ", " + move2 + ")";
+  
    //var url = "/Chasemaster/AjaxResponse?move1=" + escape(move1) + "&move2=" + escape(move2);
-  //var url = "/Chasemaster/web?move1=" + escape(move1) + "&move2=" + escape(move2);
-  var url = "/Chasemaster/web/move";
+  var url = "/Chasemaster/async?move1=" + escape(move1) + "&move2=" + escape(move2);
+  //var url = "/Chasemaster/web/move";
 
    if (window.XMLHttpRequest) {
       request = new XMLHttpRequest();

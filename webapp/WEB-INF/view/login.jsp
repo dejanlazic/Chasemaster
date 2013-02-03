@@ -12,8 +12,9 @@
 
 	<!-- Use context relative (i.e. absolute) paths with forwarding -->
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/style/main.css"></link>
+<!-- 
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js/main.js"></script>
-
+-->
 	<title>Chasemaster: Login</title>
 </head>
 
