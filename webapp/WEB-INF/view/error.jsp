@@ -12,10 +12,10 @@
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/style/main.css"></link>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/main.js"></script>
 
-		<title>Chase Master: Error Page</title>
+		<title>Chasemaster: Error Page</title>
 	</head>
 
 	<body>
-		<div class="message"><c:out value="${requestScope.errMessage}"/></div>
+		<div class="message"><c:out value="${requestScope.errorMessage}"/></div>
 	</body>
 </html>

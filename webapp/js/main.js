@@ -6,15 +6,17 @@ var move2;
 var request;
 
 function initAll() {
-   alert("=== Click 2 fields in the FIRST row (a1-h1)");
+   alert("Click 2 fields in the FIRST row (a1-h1)");
    document.getElementById("msg").innerHTML = document.getElementById("msg").value + "In initAll()";
+   document.getElementById("msg").value = document.getElementById("msg").value + "- In initAll()";
 
    //document.getElementById("h1").onclick = clickHandler;
    //document.getElementById("h2").onclick = clickHandler;
 }
 
 function clickHandler() {
-   document.getElementById("msg").innerHTML = document.getElementById("msg").value + "<br/>In clickHandler()";
+  document.getElementById("msg").innerHTML = document.getElementById("msg").value + "<br/>In clickHandler()";
+  document.getElementById("msg").value = document.getElementById("msg").value + "<br/>- In clickHandler()";
 
    // do some check
    // return false; // to cancel execution
@@ -67,7 +69,8 @@ function doPrompt() {
 /* AJAX */
 
 function moveHandler(move) {
-  document.getElementById("msg").innerHTML = document.getElementById("msg").value + "<br/>In moveHandler()" + moveCount;
+  document.getElementById("msg").innerHTML = document.getElementById("msg").value + "<br/>In moveHandler(): " + moveCount;
+  document.getElementById("msg").value = document.getElementById("msg").value + "<br/>- In moveHandler(): " + moveCount;
   
    if (moveCount == 0) {
       move1 = move;
@@ -77,14 +80,15 @@ function moveHandler(move) {
       moveCount = 0;
 
       document.getElementById("msg").innerHTML = document.getElementById("msg").value + "<br/>In moveHandler(" + move1 + ", " + move2 + ")";
+      document.getElementById("msg").value = document.getElementById("msg").value + "<br/>- In moveHandler(" + move1 + ", " + move2 + ")";
       
       sendMoves();
    }
 }
 
 function sendMoves() {
-  //alert("In sendMoves(" + move1 + ", " + move2 + ")");
   document.getElementById("msg").innerHTML = document.getElementById("msg").value + "<br/>In sendMoves(" + move1 + ", " + move2 + ")";
+  document.getElementById("msg").value = document.getElementById("msg").value + "<br/>- In sendMoves(" + move1 + ", " + move2 + ")";
   
    //var url = "/Chasemaster/AjaxResponse?move1=" + escape(move1) + "&move2=" + escape(move2);
   var url = "/Chasemaster/async?move1=" + escape(move1) + "&move2=" + escape(move2);
@@ -106,8 +110,7 @@ function callback() {
    
    if (request.readyState == 4) {
       if (request.status == 200) {
-         var message = document.getElementById('message');
-         message.value = request.responseText;
+         document.getElementById('message').value = request.responseText;
       }
    }
    

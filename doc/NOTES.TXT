@@ -17,5 +17,9 @@ com.mgs.chess package
 * I implemented ChessAnalyzer.isCheckMate() because it was not implemented
 
 
+URLs changed:
+------------
+
+redirect.jsp
 
 

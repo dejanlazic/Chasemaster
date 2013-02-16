@@ -122,7 +122,9 @@
 		
 		      <!-- Testing column - REMOVE -->
 		      <td> 
-		         <b>Context path:</b> ${pageContext.request.contextPath}
+		         <b>Context path:</b> ${pageContext.request.contextPath} <br/>
+               <b>User ID:</b> ${sessionScope.userId}
+
 		         <p id="msg"></p>
 		      </td>
 	      <tr>

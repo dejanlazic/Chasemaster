@@ -1,0 +1,105 @@
+<project name="Chasemaster" default="deploy">
+  <property file="build.properties" />
+
+  <property name="src.dir" value="src/main/java" />
+  <property name="webapp.dir" value="webapp" />
+  <property name="web-inf.dir" value="${webapp.dir}/WEB-INF" />
+  <property name="classes.dir" value="${web-inf.dir}/classes" />
+  <property name="dist.dir" value="target" />
+  <property name="lib.dir" value="${web-inf.dir}/lib" />
+  <property name="config.dir" value="config" />
+
+  <path id="compile.classpath">
+    <fileset dir="${lib.dir}">
+      <include name="**/*.jar" />
+    </fileset>
+    
+    <fileset dir="${web-inf.dir}/lib_maven">
+      <include name="**/*.jar" />
+    </fileset>
+    
+    <fileset dir="lib">
+      <include name="**/*.jar" />
+    </fileset>    
+  </path>
+
+  <target name="clean">
+    <delete dir="${classes.dir}" />
+    <delete dir="${dist.dir}" />
+  </target>
+
+  <target name="init" depends="clean">
+    <mkdir dir="${classes.dir}" />
+    <mkdir dir="${dist.dir}" />
+    
+    <copy todir="${classes.dir}">
+      <fileset dir="${config.dir}" />
+    </copy>    
+  </target>
+
+  <!-- Copy a set of files to a directory -->
+  <!--
+  <target name="copy_dir" depends="clean">
+    <copy todir="../new/dir">
+      <fileset dir="src_dir" />
+    </copy>
+  </target>
+  -->
+
+  <!-- Copy a set of files to a directory -->
+  <!--
+  <target name="copy_files" depends="clean">
+    <copy todir="../dest/dir">
+      <fileset dir="src_dir">
+        <exclude name="**/*.java" />
+      </fileset>
+    </copy>
+  </target>
+  -->
+  
+  <!-- Copies some resources to a given directory. -->
+<!--  
+  <target name="copy_resources" depends="clean">
+    <copy todir="dest" flatten="true">
+      <resources>
+        <file file="src_dir/file1.txt" />
+        <url url="http://ant.apache.org/index.html" />
+      </resources>
+    </copy>
+  </target>
+-->
+  <target name="compile" depends="init">
+    <javac destdir="${classes.dir}" debug="true" srcdir="${src.dir}">
+      <classpath refid="compile.classpath" />
+    </javac>
+  </target>
+
+  <!-- needxmlfile="false" if annotation is used -->
+<!--  
+  <target name="war" depends="compile">
+    <war 
+      needxmlfile="false" 
+      basedir="${webapp.dir}" 
+      warfile="${dist.dir}/${ant.project.name}.war">      
+        <exclude name="${web-inf.dir}/web.xml"/>
+    </war>
+  </target>
+-->
+  <target name="war" depends="compile">
+    <war 
+      webxml="${web-inf.dir}/web.xml"
+      basedir="${webapp.dir}" 
+      warfile="${dist.dir}/${ant.project.name}.war">      
+        <exclude name="${web-inf.dir}/web.xml"/>
+    </war>
+  </target>
+
+  <target name="undeploy">
+    <delete file="${deploy.path}/${ant.project.name}.war" />
+    <delete dir="${deploy.path}/${ant.project.name}"/>
+  </target>
+
+  <target name="deploy" depends="war, undeploy">
+    <copy file="${dist.dir}/${ant.project.name}.war" todir="${deploy.path}" />
+  </target>
+</project>

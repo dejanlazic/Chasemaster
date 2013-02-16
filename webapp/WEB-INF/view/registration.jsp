@@ -1,12 +1,9 @@
 <!doctype html>
 
-<%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
-<%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
 <html>
 <head>
-  <meta charset="utf-8">  
   <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -20,28 +17,31 @@
 
 <body>
   <div id="main">
-     <h1>Login</h1>
+     <h1>Registration</h1>
 
-     <!-- INPUT FORM -->
     <div class="form">
-        <form:form method="post" action="register" commandName="user" class="form-vertical">
-          <!-- 
-          <form:label path="id">Id</form:label>
-          <form:input path="id" readonly="true"/>
-           -->          
-          <form:label path="username">Username</form:label>
-          <form:input path="username" />
-          <form:label path="password">Password</form:label>
-          <form:input path="password" />
-          <form:label path="passwordConfirmation">Confirm Password</form:label>
-          <form:input path="passwordConfirmation" />
-          <form:label path="email">E-mail</form:label>
-          <form:input path="email" />
+        <form method="post" action="register.do">
+          <table>
+            <tr>
+              <td>Username</td>
+              <td><input id="username" name="username"/></td>
+            </tr>
+            <tr>
+              <td>Password</td>
+              <td><input id="password" name="password" /></td>
+            </tr>
+            <tr>
+              <td>Confirm Password</td>
+              <td><input id="passwordConfirmation" name="passwordConfirmation" /></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td align="right"><input type="submit" value="Submit" class="btn" /></td>
+            </tr>
+          </table>
+        </form>
 
-          <input type="submit" value="Submit" class="btn" />
-        </form:form>
-
-        <a href="/Chasemaster/web/">Login</a>
+        <a href="/Chasemaster/loginForm.do">Login</a>
       </div>
     </div>
 </body>

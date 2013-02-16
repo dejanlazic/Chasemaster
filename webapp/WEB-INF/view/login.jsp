@@ -1,12 +1,9 @@
 <!doctype html>
 
-<%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
-<%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
 <html>
 <head>
-  <meta charset="utf-8">  
   <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -25,47 +22,30 @@
       <!-- INPUT FORM -->
       
     <div class="form">
-      <form:form method="post" action="login" commandName="userCredentials" class="form-vertical">
-         <form:label path="username">Username</form:label>
-         <form:input path="username" />
-         <form:label path="password">Password</form:label>
-         <form:input path="password" />               
-                        
-         <input type="submit" value="Submit" class="btn" />
-      </form:form>
+      <form method="post" action="login.do">
+          <table>
+            <tr>
+              <td>Username</td>
+              <td><input id="username" name="username" /></td>
+            </tr>
+            <tr>
+              <td>Password</td>
+              <td><input id="password" name="password" /></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td align="right"><input type="submit" value="Submit" class="btn" /></td>
+            </tr>
+          </table>
+      </form>
     </div>
   
-      <!-- 
-      <a href="/Chasemaster/registrationForm" class="btn btn-primary">Register</a>
-      <a href="/registrationForm" class="btn btn-primary">Register</a>
-      <a href="/registrationForm/" class="btn btn-primary">Register</a>
-      <a href="/Chasemaster/registrationForm/" class="btn btn-primary">Register</a>      
-      <form:form method="get" action="registrationForm" class="form-vertical">
-         <input type="submit" value="Submit" class="btn" />
-      </form:form>                        
-       -->
-      <a href="/Chasemaster/web/registrationForm">Registration</a>
+    <a href="/Chasemaster/registrationForm.do">Registration</a>
       
       <!-- OUTPUT DATA -->
       
       <h3><c:out value="${city.name}"/></h3>
 
-
-      <c:if test="${!empty geoDataMap}">
-         <h5>Geographic</h5>
-                  
-         <table class="table table-bordered table-striped">
-            <tr>
-               <td style="width: 50%;">Country name</td>
-               <td style="width: 50%;"><c:out value="${geoDataMap.countryName}"/></td>
-            </tr>
-            <tr>
-               <td>Country code</td>
-               <td><c:out value="${geoDataMap.countryCode}"/></td>
-            </tr>
-         </table>                        
-      </c:if>            
-      
       <c:if test="${!empty dataList}">
          <h5>Weather</h5>
                   

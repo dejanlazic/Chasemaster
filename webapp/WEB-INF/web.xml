@@ -6,33 +6,46 @@
   version="2.5">
   
   <display-name>Chasemaster</display-name>
-  
-  <context-param>
-    <param-name>contextConfigLocation</param-name>
-    <param-value> classpath:app-context-core.xml, classpath:app-context-web.xml, classpath:app-context-ws.xml,
-      classpath:app-context-jpa.xml, classpath:app-context-security.xml </param-value>
-  </context-param>
-  
-  <listener>
-    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-  </listener>
-  
+
   <servlet>
-    <servlet-name>CXFServlet</servlet-name>
-    <servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>
-    <load-on-startup>1</load-on-startup>
+    <servlet-name>ControllerServlet</servlet-name>
+    <servlet-class>com.chasemaster.web.ControllerServlet</servlet-class>
+
+    <!-- MySQL RDBMS -->
+		<init-param>
+			<param-name>jdbcDriverClassName</param-name>
+			<param-value>com.mysql.jdbc.Driver</param-value>
+		</init-param>
+		<init-param>
+			<param-name>dbURL</param-name>
+			<param-value>jdbc:mysql://localhost:3306/chasemaster</param-value>
+			<!-- param-value>jdbc:mysql://localhost/chasemaster</param-value -->
+		</init-param>
+		<init-param>
+			<param-name>dbUsername</param-name>
+			<param-value>root</param-value>
+		</init-param>
+		<init-param>
+			<param-name>dbPassword</param-name>
+			<param-value>admin</param-value>
+		</init-param>    
+    <!-- DAO implementation -->
+		<init-param>
+			<param-name>authDAOClassName</param-name>
+			<param-value>com.chasemaster.persistence.db.mysql.AuthenticationDAOImpl</param-value>
+		</init-param>
+		<init-param>
+			<param-name>playerDAOClassName</param-name>
+			<param-value>com.chasemaster.persistence.db.mysql.PlayerDAOImpl</param-value>
+		</init-param>
+		<init-param>
+			<param-name>gameDAOClassName</param-name>
+			<param-value>com.chasemaster.persistence.db.mysql.GameDAOImpl</param-value>
+		</init-param>
+    
+    <load-on-startup>1</load-on-startup>        
   </servlet>
-  
-  <servlet>
-    <servlet-name>SpringServlet</servlet-name>
-    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-    <init-param>
-      <param-name>contextConfigLocation</param-name>
-      <param-value>classpath:app-context-web.xml</param-value>
-    </init-param>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
-  
+      
   <servlet>
     <servlet-name>AjaxServlet</servlet-name>
     <servlet-class>com.chasemaster.web.AjaxServlet</servlet-class>
@@ -40,15 +53,10 @@
   </servlet>
   
   <servlet-mapping>
-    <servlet-name>CXFServlet</servlet-name>
-    <url-pattern>/ws/*</url-pattern>
+    <servlet-name>ControllerServlet</servlet-name>
+    <url-pattern>*.do</url-pattern>
   </servlet-mapping>
-  
-  <servlet-mapping>
-    <servlet-name>SpringServlet</servlet-name>
-    <url-pattern>/web/*</url-pattern>
-  </servlet-mapping>
-  
+
   <servlet-mapping>
     <servlet-name>AjaxServlet</servlet-name>
     <url-pattern>/async/*</url-pattern>
