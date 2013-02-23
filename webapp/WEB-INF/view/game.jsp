@@ -1,7 +1,7 @@
 <html>
 
 	<head>
-		<title>Chase Master: Game</title>
+		<title>Chasemaster: Game</title>
 
 		<!-- Use context relative (i.e. absolute) paths with forwarding -->
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/style/main.css">
@@ -9,12 +9,6 @@
 	</head>
 
 	<body>
-		<script type="text/javascript">
-			<!-- hide script from older browsers
-				document.write("<h1>Chasemaster</h1>");
-			// end hiding script --> 
-		</script>
-
       <table>
 	      <tr>
 		      <td>		   
@@ -87,17 +81,17 @@
 							<div id="e2" class="cell white">e2</div>
 							<div id="f2" class="cell black">f2</div>
 							<div id="g2" class="cell white">g2</div>
-							<div id="h2" class="cell black"><a href="#" id="h2">h2</a></div>
+							<div id="h2" class="cell black">h2</div>
 						</div>
 						<div class="row">
-							<div id="a1" class="cell black" onclick="moveHandler('a1');">a1</div>
-							<div id="b1" class="cell white" onclick="moveHandler('b1');">b1</div>
-							<div id="c1" class="cell black" onclick="moveHandler('c1');">c1</div>
-							<div id="d1" class="cell white" onclick="moveHandler('d1');">d1</div>
-							<div id="e1" class="cell black" onclick="moveHandler('e1');">e1</div>
-							<div id="f1" class="cell white" onclick="moveHandler('f1');">f1</div>
-							<div id="g1" class="cell black" onclick="moveHandler('g1');">g1</div>
-							<div id="h1" class="cell white" onclick="moveHandler('h1');">h1</div>
+							<div id="a1" class="cell black">a1</div>
+							<div id="b1" class="cell white">b1</div>
+							<div id="c1" class="cell black">c1</div>
+							<div id="d1" class="cell white">d1</div>
+							<div id="e1" class="cell black">e1</div>
+							<div id="f1" class="cell white">f1</div>
+							<div id="g1" class="cell black">g1</div>
+							<div id="h1" class="cell white">h1</div>
 						</div>		
 					</div> <!-- field -->
 			
@@ -120,7 +114,7 @@
 					</div>		
 		      </td>
 		
-		      <!-- Testing column - REMOVE -->
+		      <!-- Testing column - Use it later for table with users and their movements  -->
 		      <td> 
 		         <b>Context path:</b> ${pageContext.request.contextPath} <br/>
                <b>User ID:</b> ${sessionScope.userId}

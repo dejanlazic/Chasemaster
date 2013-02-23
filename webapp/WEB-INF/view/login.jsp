@@ -9,9 +9,7 @@
 
 	<!-- Use context relative (i.e. absolute) paths with forwarding -->
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/style/main.css"></link>
-<!-- 
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js/main.js"></script>
--->
 	<title>Chasemaster: Login</title>
 </head>
 
@@ -22,19 +20,25 @@
       <!-- INPUT FORM -->
       
     <div class="form">
-      <form method="post" action="login.do">
+      <form method="post" action="login.do" onSubmit="return validateLoginForm();">
           <table>
             <tr>
               <td>Username</td>
-              <td><input id="username" name="username" /></td>
+            </tr>
+            <tr>
+              <td><input id="username" name="username" value="dejan" /></td>
             </tr>
             <tr>
               <td>Password</td>
-              <td><input id="password" name="password" /></td>
             </tr>
             <tr>
-              <td></td>
-              <td align="right"><input type="submit" value="Submit" class="btn" /></td>
+              <td><input id="password" name="password" value="lazic" /></td>
+            </tr>
+            <tr>
+              <td><p id="message" style="color:red;"></p></td>
+            </tr>
+            <tr>
+              <td align="left"><input type="submit" value="Submit" class="btn" /></td>
             </tr>
           </table>
       </form>

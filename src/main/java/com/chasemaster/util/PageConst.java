@@ -9,4 +9,8 @@ public interface PageConst {
   String REGISTRATION_PAGE  = PREFIX    + "registration"   + SUFFIX;
   String GAME_PAGE          = PREFIX    + "game"            + SUFFIX;
   String HOME_PAGE = "/home.jsp";
+  
+  
+  
+  String D_N_D          = PREFIX    + "draganddrop"            + SUFFIX; // TODO Remove
 }

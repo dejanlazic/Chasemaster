@@ -5,10 +5,8 @@ import org.apache.log4j.Logger;
 import com.chasemaster.exception.LoginException;
 import com.chasemaster.exception.NoResultException;
 import com.chasemaster.exception.NoUniqueResultException;
-import com.chasemaster.exception.PlayerException;
 import com.chasemaster.persistence.AuthenticationDAO;
 import com.chasemaster.persistence.DAOException;
-import com.chasemaster.persistence.PlayerDAO;
 import com.chasemaster.persistence.model.Player;
 
 public class AuthenticationService {

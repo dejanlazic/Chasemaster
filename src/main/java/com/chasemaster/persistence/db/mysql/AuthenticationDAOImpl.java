@@ -78,7 +78,11 @@ public class AuthenticationDAOImpl extends AuthenticationDAO {
 
       return player;
     } catch (SQLException sqe) {
-      sqe.printStackTrace();
+      try {
+        con.rollback();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
       throw new DAOException(sqe.getMessage());
     } finally {
       DBUtil.close(stmt, con);

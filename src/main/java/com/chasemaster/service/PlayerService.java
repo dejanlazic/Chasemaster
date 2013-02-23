@@ -1,12 +1,9 @@
 package com.chasemaster.service;
 
-import java.util.Date;
-
 import org.apache.log4j.Logger;
 
 import com.chasemaster.exception.NoResultException;
 import com.chasemaster.exception.NoUniqueResultException;
-import com.chasemaster.exception.PlayerException;
 import com.chasemaster.exception.RegistrationException;
 import com.chasemaster.persistence.DAOException;
 import com.chasemaster.persistence.PlayerDAO;
@@ -57,17 +54,14 @@ public class PlayerService {
     } catch (NoResultException e) {
       try {
         playerDao.create(username, password);
-      } catch (PlayerException e1) {
-        message = "?";
-        e1.printStackTrace();
+      } catch (DAOException e1) {
+        throw new ServiceException(e1.getMessage());
       }
-      // System.out.println("Created new: " + u);
       message = "Player successfully registered";
     } catch (NoUniqueResultException e) {
-      message = e.getMessage() + ". Please contact administrator.";
-    } catch (PlayerException e1) {
-      message = "?";
-      e1.printStackTrace();
+      throw new RegistrationException(e.getMessage() + ". Please contact administrator.");
+    } catch (DAOException e) {
+      throw new ServiceException(e.getMessage());
     }
 
     return message;

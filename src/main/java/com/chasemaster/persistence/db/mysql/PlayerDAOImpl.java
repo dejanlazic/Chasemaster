@@ -36,12 +36,13 @@ public class PlayerDAOImpl extends PlayerDAO {
   }
 
   @Override
-  public void create(String username, String password) throws PlayerException {
+  public void create(String username, String password) throws DAOException {
     final String sql = "INSERT INTO players (username, password, registered_on)"
         + " VALUES (?, ?, ?)";
 
     Connection con = null;
     PreparedStatement stmt = null;
+    
     try {
       con = DBUtil.getConnection();
       stmt = con.prepareStatement(sql);
@@ -59,8 +60,12 @@ public class PlayerDAOImpl extends PlayerDAO {
 
       con.commit();
     } catch (SQLException sqe) {
-      sqe.printStackTrace();
-      throw new PlayerException(sqe.getMessage());
+      try {
+        con.rollback();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+      throw new DAOException(sqe.getMessage());
     } finally {
       DBUtil.close(stmt, con);
     }
@@ -72,7 +77,7 @@ public class PlayerDAOImpl extends PlayerDAO {
    * @see com.chasemaster.persistence.PlayerDAO#find(java.lang.String)
    */
   @Override
-  public Player find(String username) throws NoResultException, NoUniqueResultException, PlayerException {
+  public Player find(String username) throws NoResultException, NoUniqueResultException, DAOException {
     final String sql = "SELECT * FROM players WHERE username=?";
 
     Connection con = null;
@@ -110,19 +115,18 @@ public class PlayerDAOImpl extends PlayerDAO {
 
         player = new Player(id, uName, fName, lName);
 
-        LOGGER.info("FIND -> Selected user: [id=" + id + ", fName=" + fName + ", lName=" + lName + "]");
+        LOGGER.info("Selected Player[id=" + id + ", fName=" + fName + ", lName=" + lName + "]");
       }
       con.commit();
 
       return player;
     } catch (SQLException sqe) {
-      sqe.printStackTrace();
       try {
         con.rollback();
       } catch (SQLException e) {
         e.printStackTrace();
       }
-      throw new PlayerException(sqe.getMessage());
+      throw new DAOException(sqe.getMessage());
     } finally {
       DBUtil.close(stmt, con);
     }

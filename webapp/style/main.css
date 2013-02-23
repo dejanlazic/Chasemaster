@@ -11,10 +11,6 @@ div#main {
 	margin-right: auto;	
 }
 
-
-
-
-
 #grid
 {
 	width: 400px;
@@ -84,3 +80,31 @@ div#main {
 	background-color: yellow;
 	color: red;
 }
+
+
+/* Drag and Drop */
+
+.drag3, .list
+{
+  width: 150px;
+}
+
+.drag
+{
+  z-index: 100;
+  position: absolute;
+  opacity: .50;
+  filter: alpha(opacity=50);
+}
+
+.list
+{
+  position: relative;
+  z-index: 1;
+  opacity: 1;
+  filter: alpha(opacity=100);
+  top: 0px;
+  left: 0px;
+}
+
+.drag2 { position: relative; }

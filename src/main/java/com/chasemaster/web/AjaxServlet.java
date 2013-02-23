@@ -21,10 +21,10 @@ public class AjaxServlet extends HttpServlet {
 
   private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException,
       IOException {
-    String move1 = request.getParameter("move1");
-    String move2 = request.getParameter("move2");
+    String positionFrom = request.getParameter("positionFrom");
+    String positionTo = request.getParameter("positionTo");
 
-    System.out.println("AjaxServlet: [" + move1 + ", " + move2 + "]");
+    System.out.println("AjaxServlet: [" + positionFrom + ", " + positionTo + "]");
     
     HttpSession session = request.getSession();
 
@@ -34,6 +34,6 @@ public class AjaxServlet extends HttpServlet {
     response.setContentType("text/xml");
     response.setHeader("Cache-Control", "no-cache");
 
-    response.getWriter().write(move1 + ", " + move2);
+    response.getWriter().write(positionFrom + ", " + positionTo);
   }
 }

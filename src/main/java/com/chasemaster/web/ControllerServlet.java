@@ -153,7 +153,8 @@ public class ControllerServlet extends HttpServlet implements PageConst {
         request.setAttribute("errorMessage", "Unknown error. Please contact system administrator.");
       } else {
         LOGGER.info("User authenticated. Putting Player[" + player.getId() + ", " + player.getUsername() + "] in session.");
-        destinationPage = GAME_PAGE;
+        destinationPage = GAME_PAGE; 
+        //destinationPage = D_N_D; // TODO Remove (drag & drop testing)
         
         // put player into session
         // (and replace existing one if exists in session - no need for logout)
@@ -346,8 +347,8 @@ public class ControllerServlet extends HttpServlet implements PageConst {
     // collect request parameters
     String username = request.getParameter("username");
     String password = request.getParameter("password");
-    String fName = request.getParameter("first_name");
-    String lName = request.getParameter("last_name");
+//    String fName = request.getParameter("first_name");
+//    String lName = request.getParameter("last_name");
 
     // retrieve role id from db for use in relationship with user
     try {
@@ -356,7 +357,7 @@ public class ControllerServlet extends HttpServlet implements PageConst {
       System.out.println("---> " + s);
     } catch (ServiceException e) {
       request.setAttribute("errorMessage", e.getMessage());
-      destinationPage = ERROR_PAGE;
+      destinationPage = ERROR_PAGE; // TODO Handle this
     } catch (RegistrationException e) {
       request.setAttribute("errorMessage", e.getMessage());
       destinationPage = ERROR_PAGE;
