@@ -1,18 +1,32 @@
-window.onload = initAll;
+// window.onload = init;
 
 var request;
 var _debug;
 var _message;
+var left;
+var top;
 
-function initAll() {
+function init() {
   //alert("Click 2 fields in the FIRST row (a1-h1)");
   
   _debug = document.getElementById("msg");
   _message = document.getElementById('message');
   
-  _debug.innerHTML = _debug.value + "<br/>In initAll()";
+  _debug.innerHTML = _debug.value + "<br/>In init()";
 
-  InitDragDrop();
+  postload();
+  InitDragDrop();  
+}
+
+function postload() {
+  var leftTopDiv = document.getElementById("a8");
+  left = leftTopDiv.style.left;
+  top = leftTopDiv.style.top;
+  
+  _debug.innerHTML = _debug.value + "<br/>In postload(), left=" + left + ", top=" + top + ", value=" + leftTopDiv.value;
+  //_debug.innerHTML = _debug.value + "<br/>In postload(), left=";
+  
+  //alert("postload()");
 }
 
 // check input mandatory input fields
@@ -119,13 +133,14 @@ function OnMouseDown(e) {
   startX = e.clientX; 
   startY = e.clientY; 
 
-  // grab the clicked element's position
-  //offsetX = ExtractNumber(target.style.left); 
-  //offsetY = ExtractNumber(target.style.top); 
-  
   // IE uses srcElement, others use target
-  var target = e.target != null ? e.target : e.srcElement;    
-  _debug.innerHTML = _debug.value + "<br/>In OnMouseDown(): " + target.id + "; " + startX + "," + startY;;
+  var target = e.target != null ? e.target : e.srcElement;
+  
+  // grab the clicked element's position
+  offsetX = ExtractNumber(target.style.left); 
+  offsetY = ExtractNumber(target.style.top); 
+  
+  _debug.innerHTML = _debug.value + "<br/>In OnMouseDown(): " + target.id + ": " + startX + "," + startY + " - " + offsetX + "," + offsetY;
   
   //if ((e.button == 1 && window.event != null || e.button == 0) && target.className == 'drag') {
   if (e.button == 1 && window.event != null || e.button == 0) {  

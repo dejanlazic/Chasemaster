@@ -154,11 +154,48 @@ public class ControllerServlet extends HttpServlet implements PageConst {
       } else {
         LOGGER.info("User authenticated. Putting Player[" + player.getId() + ", " + player.getUsername() + "] in session.");
         destinationPage = GAME_PAGE; 
-        //destinationPage = D_N_D; // TODO Remove (drag & drop testing)
         
         // put player into session
         // (and replace existing one if exists in session - no need for logout)
         session.setAttribute("player", player);
+        
+        // create map with pieces (images) on a board
+        Map<String, String> pieces = new HashMap<String, String>();
+        pieces.put("A8", "brook.gif");
+        pieces.put("B8", "bknight.gif");
+        pieces.put("C8", "bbishop.gif");
+        pieces.put("D8", "bqueen.gif");
+        pieces.put("E8", "bking.gif");
+        pieces.put("F8", "bbishop.gif");
+        pieces.put("G8", "bknight.gif");
+        pieces.put("H8", "brook.gif");
+        pieces.put("A7", "bpawn.gif");
+        pieces.put("B7", "bpawn.gif");
+        pieces.put("C7", "bpawn.gif");
+        pieces.put("D7", "bpawn.gif");
+        pieces.put("E7", "bpawn.gif");
+        pieces.put("F7", "bpawn.gif");
+        pieces.put("G7", "bpawn.gif");
+        pieces.put("H7", "bpawn.gif");
+
+        pieces.put("A2", "wpawn.gif");
+        pieces.put("B2", "wpawn.gif");
+        pieces.put("C2", "wpawn.gif");
+        pieces.put("D2", "wpawn.gif");
+        pieces.put("E2", "wpawn.gif");
+        pieces.put("F2", "wpawn.gif");
+        pieces.put("G2", "wpawn.gif");
+        pieces.put("H2", "wpawn.gif");
+        
+        pieces.put("A1", "wrook.gif");
+        pieces.put("B1", "wknight.gif");
+        pieces.put("C1", "wbishop.gif");
+        pieces.put("D1", "wqueen.gif");
+        pieces.put("E1", "wking.gif");
+        pieces.put("F1", "wbishop.gif");
+        pieces.put("G1", "wknight.gif");
+        pieces.put("H1", "wrook.gif");        
+        session.setAttribute("pieces", pieces);
       }
     } catch (ServiceException e) {
       // TODO Do something to fix this

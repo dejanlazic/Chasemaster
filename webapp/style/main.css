@@ -84,12 +84,13 @@ div#main {
 
 /* Drag and Drop */
 
-.drag3, .list
+.drag, .list
 {
-  width: 150px;
+  width: 50px;
+  height: 50px;
 }
 
-.drag
+.drag2
 {
   z-index: 100;
   position: absolute;
@@ -107,4 +108,4 @@ div#main {
   left: 0px;
 }
 
-.drag2 { position: relative; }
+.drag3 { position: relative; }
