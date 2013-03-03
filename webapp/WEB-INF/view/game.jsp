@@ -1,3 +1,6 @@
+<%@ page contentType="text/html" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <html>
 
 	<head>
@@ -117,7 +120,8 @@
 		      <!-- Testing column - Use it later for table with users and their movements  -->
 		      <td> 
 		         <b>Context path:</b> ${pageContext.request.contextPath} <br/>
-               <b>User ID:</b> ${sessionScope.userId}
+                <!-- display cookie -->
+                <b>User ID:</b> <c:out value="${cookie.playerId.value}" /></b>
 
 		         <p id="msg"></p>
 		      </td>
@@ -126,7 +130,29 @@
 
       <script>
         // call AFTER page is loaded
-        window.onload = init; 
+        //window.onload = postload; 
+        
+        <!-- AJAX call to register async communication in servlet, and wait until a message is posted --> 
+
+        var messagesWaiting = false;
+        
+        function getMessages() {
+            if(!messagesWaiting) {
+                messagesWaiting = true;
+                
+                var xmlRequest = new XMLHttpRequest();
+                xmlRequest.onreadystatechange = function() {
+                    if (xmlRequest.readyState==4 && xmlRequest.status==200) {
+                        messagesWaiting = false;
+                    }
+                }
+                
+                xmlRequest.open("GET", "Game?operation=start&t=" + new Date(), true);
+                xmlRequest.send();
+            }
+        }
+        
+        setInterval(getMessages, 1000);
       </script>
 	</body>
 </html>

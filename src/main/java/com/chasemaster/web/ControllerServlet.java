@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -30,24 +31,35 @@ import com.chasemaster.util.PageConst;
 public class ControllerServlet extends HttpServlet implements PageConst {
   private static final long serialVersionUID = -6190407189326129661L;
   private static final Logger LOGGER = Logger.getLogger(ControllerServlet.class);
-
-  // private ServletContext context;
+  private static final String INIT_PARAM_PLAYERS_NUM = "playersNum";
+  
+  private ServletContext context;
   private HttpSession session;
+  
   private PlayerService playerService;
   private AuthenticationService authenticationService;
+
+  // private List<AsyncContext> contexts = new LinkedList<>(); // JDK 7
+  private List<AsyncContext> contexts = new LinkedList<AsyncContext>();
 
   private String destinationPage = ERROR_PAGE; // default response page
   // private Subject subject;
   private String errMsg = null;
 
+  private Map<String, String> playerMovementPairs = new HashMap<String, String>();
+  
   /*
    * Initialize all necessary variables (executed only once)
    */
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
 
-    // context = config.getServletContext();
+    context = config.getServletContext();
 
+    // put in context the initial number of group players
+    context.setAttribute(INIT_PARAM_PLAYERS_NUM, config.getInitParameter(INIT_PARAM_PLAYERS_NUM));
+    LOGGER.debug(INIT_PARAM_PLAYERS_NUM + "=" + context.getAttribute(INIT_PARAM_PLAYERS_NUM));
+    
     // get initialization parameters from the deployment descriptor (web.xml)
     String jdbcDriverClassName = config.getInitParameter("jdbcDriverClassName");
     String databaseUrl = config.getInitParameter("dbURL");
@@ -104,7 +116,7 @@ public class ControllerServlet extends HttpServlet implements PageConst {
       // destinationPage = LOGIN_PAGE;
     } else {
       // check request parameter(s)
-      if (logicalName.equals("loginForm")) {
+      if ("loginForm".equals(logicalName)) {
         processLoginPage();
         // } else if (action.equals("login")) {
         // processLogin(request);
@@ -112,12 +124,18 @@ public class ControllerServlet extends HttpServlet implements PageConst {
         // processLogout();
         // } else if (action.equals("home_page")) {
         // processHomePage();
-      } else if (logicalName.equals("login")) {
-        processLogin(request);
-      } else if (logicalName.equals("registrationForm")) {
+      } else if ("login".equals(logicalName)) {
+        processLogin(request, response);
+      } else if ("registrationForm".equals(logicalName)) {
         processRegistrationPage();
-      } else if (logicalName.equals("register")) {
+      } else if ("register".equals(logicalName)) {
         processRegister(request);
+      } else if ("async".equals(logicalName)) {
+        processAsync(request, response);
+      } else if ("asyncstart".equals(logicalName)) {
+        processAsyncStart(request, response);
+      } else if ("asyncsend".equals(logicalName)) {
+        processAsyncSend(request, response);
       } else {
         request.setAttribute("errorMessage", "Unknown action");
       }
@@ -125,8 +143,8 @@ public class ControllerServlet extends HttpServlet implements PageConst {
 
     LOGGER.info("Destination page: " + destinationPage);
 
-    // AJAX does NOT use dispatching
-    if (!logicalName.equals("get_note")) {
+    // AJAX does NOT use dispatching, so exclude Ajax calls
+    if (!logicalName.equals("async") && !logicalName.equals("asyncstart") && !logicalName.equals("asyncsend")) {
       RequestDispatcher rd = getServletContext().getRequestDispatcher(destinationPage);
       rd.forward(request, response);
     }
@@ -139,7 +157,7 @@ public class ControllerServlet extends HttpServlet implements PageConst {
     destinationPage = LOGIN_PAGE;
   }
 
-  private void processLogin(HttpServletRequest request) {
+  private void processLogin(HttpServletRequest request, HttpServletResponse response) {
     LOGGER.info("Authenticate a user");
     destinationPage = ERROR_PAGE;
 
@@ -152,14 +170,14 @@ public class ControllerServlet extends HttpServlet implements PageConst {
       if (player == null) {
         request.setAttribute("errorMessage", "Unknown error. Please contact system administrator.");
       } else {
-        LOGGER.info("User authenticated. Putting Player[" + player.getId() + ", " + player.getUsername() + "] in session.");
-        destinationPage = GAME_PAGE; 
+        LOGGER.info("User authenticated. Player[" + player.getId() + ", " + player.getUsername() + "]");
         
-        // put player into session
-        // (and replace existing one if exists in session - no need for logout)
-        session.setAttribute("player", player);
+        // TODO: read userId from database (move this to login)
+        Cookie cookie = new Cookie("playerId", Integer.toString(player.getId()));
+        response.addCookie(cookie);
+        LOGGER.debug("added cookie: " + cookie.getName() + "=" + cookie.getValue());
         
-        // create map with pieces (images) on a board
+        // create a map with initial set of pieces (images) on a board
         Map<String, String> pieces = new HashMap<String, String>();
         pieces.put("A8", "brook.gif");
         pieces.put("B8", "bknight.gif");
@@ -177,7 +195,6 @@ public class ControllerServlet extends HttpServlet implements PageConst {
         pieces.put("F7", "bpawn.gif");
         pieces.put("G7", "bpawn.gif");
         pieces.put("H7", "bpawn.gif");
-
         pieces.put("A2", "wpawn.gif");
         pieces.put("B2", "wpawn.gif");
         pieces.put("C2", "wpawn.gif");
@@ -185,8 +202,7 @@ public class ControllerServlet extends HttpServlet implements PageConst {
         pieces.put("E2", "wpawn.gif");
         pieces.put("F2", "wpawn.gif");
         pieces.put("G2", "wpawn.gif");
-        pieces.put("H2", "wpawn.gif");
-        
+        pieces.put("H2", "wpawn.gif");        
         pieces.put("A1", "wrook.gif");
         pieces.put("B1", "wknight.gif");
         pieces.put("C1", "wbishop.gif");
@@ -196,6 +212,8 @@ public class ControllerServlet extends HttpServlet implements PageConst {
         pieces.put("G1", "wknight.gif");
         pieces.put("H1", "wrook.gif");        
         session.setAttribute("pieces", pieces);
+        
+        destinationPage = GAME_PAGE; 
       }
     } catch (ServiceException e) {
       // TODO Do something to fix this
@@ -204,61 +222,6 @@ public class ControllerServlet extends HttpServlet implements PageConst {
       request.setAttribute("errorMessage", e.getMessage());
     }
   }
-
-  // private void processLogin(HttpServletRequest request) {
-  // LOGGER.info("Login");
-  //
-  // // collect request parameters
-  // String username = request.getParameter("username");
-  // String password = request.getParameter("password");
-  // LOGGER.info(username);
-  // LOGGER.info(password);
-  //
-  // // authenticate the user
-  // try {
-  // Subject subject = dataFacade.authenticate(username, password);
-  // LOGGER.info("Retrieved subject: " + subject);
-  //
-  // if (subject == null) {
-  // request.setAttribute("errorMessage", "Unknown error. Please contact system administrator.");
-  // destination = ERROR_PAGE;
-  // } else {
-  // // put subject into session
-  // // (and replace existing one if exists in session - no need for
-  // // logout)
-  // session.setAttribute("subject", subject);
-  //
-  // // if password hasn't been changed already - force it,
-  // // otherwise display a proper page, according to a user's role
-  // if (!subject.isPasswordChanged()) {
-  // destination = CHANGE_PWD_PAGE;
-  // } else {
-  // destination = HOME_PAGE;
-  // }
-  // }
-  // } catch (LoginException e) {
-  // request.setAttribute("errorMessage", e.getMessage());
-  // }
-  // }
-  //
-  // // kill current session
-  // private void processLogout() {
-  // LOGGER.info("Logout");
-  //
-  // Subject s = (Subject)session.getAttribute("subject");
-  // s = null;
-  // session.invalidate();
-  // if (session == null) {
-  // LOGGER.debug("User logged out");
-  // }
-  //
-  // destination = LOGIN_PAGE;
-  // }
-  //
-  // private void processHomePage() {
-  // LOGGER.info("Send home visitor home page");
-  // destination = HOME_PAGE;
-  // }
 
   // send registration page
   private void processRegistrationPage() {
@@ -391,7 +354,7 @@ public class ControllerServlet extends HttpServlet implements PageConst {
     try {
       String s = playerService.register(username, password, password);
       destinationPage = LOGIN_PAGE;
-      System.out.println("---> " + s);
+      LOGGER.debug("---> " + s);
     } catch (ServiceException e) {
       request.setAttribute("errorMessage", e.getMessage());
       destinationPage = ERROR_PAGE; // TODO Handle this
@@ -401,6 +364,138 @@ public class ControllerServlet extends HttpServlet implements PageConst {
     }
   }
 
+  private void processAsync(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    LOGGER.info("Ajax request");
+
+    String positionFrom = request.getParameter("positionFrom");
+    String positionTo = request.getParameter("positionTo");
+
+    LOGGER.info(positionFrom + "," + positionTo);
+    
+    HttpSession session = request.getSession();
+    LOGGER.info("User ID from session: " + session.getAttribute("userId"));
+    
+    Cookie[] cookies = request.getCookies();
+    for (Cookie cookie : cookies) {
+      if ("playerId".equals(cookie.getName())) {
+        LOGGER.info("---> In GET: cookie = " + cookie.getValue());
+        break;
+      }
+    }
+    
+    // setup the response
+    response.setContentType("text/xml");
+    response.setHeader("Cache-Control", "no-cache");
+
+    // write response
+    response.getWriter().write(positionFrom + "," + positionTo);
+  }
+
+  /*
+   * Registering requests.
+   * 
+   * When the Servlet receives a "get" Request, it starts an AsyncContext by calling: request.startAsync(request,
+   * response). This will notify the Web Container that at the end of the request call it should free the handling
+   * thread and leave the connection open so that other thread writes the response and end the connection.
+   */
+  private void processAsyncStart(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    // create asynchronous context and add it to a list so we can get all waiting contexts in the doPost method
+    final AsyncContext asyncContext = request.startAsync(request, response);
+    asyncContext.setTimeout(10 * 60 * 1000); // 10 minutes
+    contexts.add(asyncContext);
+
+    // TEST
+    LOGGER.debug("---> In GET#processAsyncStart(): contexts.size: " + this.contexts.size());
+    // System.out.println("---> In GET: session id: " + request.getSession().getId());
+    //System.out.println("---> In GET: userid: " + request.getParameter("userid"));
+    Cookie[] cookies = request.getCookies();
+    for (Cookie cookie : cookies) {
+      if ("playerId".equals(cookie.getName())) {
+        LOGGER.debug("---> In GET: cookie = " + cookie.getValue());
+        break;
+      }
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private void processAsyncSend(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    LOGGER.debug("---> In POST: contexts.size = " + this.contexts.size());
+
+    // put player id and belonging movement to a map
+    
+    String positionFrom = request.getParameter("positionFrom");
+    String positionTo = request.getParameter("positionTo");
+    String playerId = "";
+
+    LOGGER.debug(positionFrom + "," + positionTo);
+    
+    Cookie[] cookies = request.getCookies();
+    for (Cookie cookie : cookies) {
+      if ("playerId".equals(cookie.getName())) {
+        playerId = cookie.getValue();
+        LOGGER.debug("---> In POST: cookie = " + playerId);
+        //break;
+      }
+    }
+    
+//    Map<String, String> playerMovementPairs = null;
+//    ServletContext context = request.getSession().getServletContext();
+//    if (context.getAttribute("playerMovementPairs") == null) {
+//      LOGGER.debug("---> In POST: creating new playerMovementPairs");
+//      playerMovementPairs = new HashMap<String, String>();
+//    } else {
+//      LOGGER.debug("---> In POST: playerMovementPairs exists");
+//      playerMovementPairs = (Map<String, String>) context.getAttribute("playerMovementPairs");
+//    }
+//    if(playerMovementPairs != null) {
+//      playerMovementPairs.put(playerId, positionTo);    
+//      context.setAttribute("playerMovementPairs", playerMovementPairs);
+//    }
+
+    playerMovementPairs.put(playerId, positionTo);    
+
+    // Check if all remaining (100 initially, but configurable), active users (requests) arrived before sending responses
+    
+    int numberOfMovements = playerMovementPairs.size();
+    int numberOfActivePlayers = Integer.parseInt((String)context.getAttribute(INIT_PARAM_PLAYERS_NUM));
+    
+    LOGGER.debug("---> In POST: numberOfMovements = " + numberOfMovements);
+    LOGGER.debug("---> In POST: numberOfActivePlayers = " + numberOfActivePlayers);
+
+    String htmlMessage = "";
+    
+    if (numberOfMovements == numberOfActivePlayers) {
+      // List<AsyncContext> asyncContexts = new ArrayList<>(this.contexts); // JDK 7
+      // get a safe copy of the list of AsyncContext
+      List<AsyncContext> asyncContexts = new ArrayList<AsyncContext>(this.contexts);
+      // clear the common list to prevent a pending request to be notified twice
+      this.contexts.clear();
+
+      // process all given movements
+      //context = request.getSession().getServletContext();
+      //playerMovementPairs = (Map<String, String>) context.getAttribute("playerMovementPairs");
+      for(Map.Entry<String, String> entry : playerMovementPairs.entrySet()) {
+        htmlMessage += "<b>User id:</b> " + entry.getKey() + ", <b>Position to:</b> " + entry.getValue() + "</br>";
+      }
+
+      /*
+       * For all the AsyncContexts queued write the message to their responses
+       */
+      for (AsyncContext asyncContext : asyncContexts) {
+        try {
+          PrintWriter writer = asyncContext.getResponse().getWriter();
+          writer.println(htmlMessage);
+          writer.flush();
+
+          // complete queued requests
+          asyncContext.complete();
+        } catch (Exception ex) {
+          LOGGER.error(ex.getMessage());
+        }
+      }
+    }    
+  }
+  
   // private void processNewChildPage(HttpServletRequest request, HttpServletResponse response) {
   // LOGGER.info("Send new child page");
   //

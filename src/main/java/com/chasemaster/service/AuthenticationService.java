@@ -25,7 +25,7 @@ public class AuthenticationService {
   }
 
   public Player login(String username, String password) throws ServiceException, LoginException {
-    System.out.println("In ChasemasterService#login: " + username);
+    LOGGER.debug("In ChasemasterService#login: " + username);
 
     // TODO: Check in JavaScript
     if (username == null) {

@@ -14,10 +14,11 @@
       <include name="**/*.jar" />
     </fileset>
     
+    <!--
     <fileset dir="${web-inf.dir}/lib_maven">
       <include name="**/*.jar" />
     </fileset>
-    
+    -->
     <fileset dir="lib">
       <include name="**/*.jar" />
     </fileset>    
