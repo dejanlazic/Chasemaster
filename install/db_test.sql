@@ -12,8 +12,9 @@
 -- INSERT INTO users (username, password, role_id)
 -- (SELECT 'SuperVisor1', 'supervisor1',id FROM roles WHERE name = 'SUPERVISOR');
 
-INSERT INTO players (username, password, first_name, last_name, registered_on) VALUES ('john', 'doe', 'John', 'Doe', '2013-02-01');
-INSERT INTO players (username, password, first_name, last_name, registered_on) VALUES ('jim', 'smyth', 'Jim', 'Smyth', '2013-02-02');
+INSERT INTO players (username, password, colour, registered_on) VALUES ('dejan', 'lazic', 'WHITE', '2013-01-01');
+INSERT INTO players (username, password, colour, registered_on) VALUES ('john', 'doe', 'BLACK', '2013-01-02');
+INSERT INTO players (username, password, colour, registered_on) VALUES ('jim', 'smyth', 'BLACK', '2013-01-03');
 
 COMMIT;
 

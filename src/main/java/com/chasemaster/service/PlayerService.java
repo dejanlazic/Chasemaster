@@ -2,6 +2,7 @@ package com.chasemaster.service;
 
 import org.apache.log4j.Logger;
 
+import com.chasemaster.Colour;
 import com.chasemaster.exception.NoResultException;
 import com.chasemaster.exception.NoUniqueResultException;
 import com.chasemaster.exception.RegistrationException;
@@ -25,18 +26,12 @@ public class PlayerService {
     }
   }
 
-  public String register(String username, String password, String passwordConfirmation) throws RegistrationException,
-      ServiceException {
-    LOGGER.debug("In PlayerService#register: " + username);
+  public String register(String username, String password) throws RegistrationException, ServiceException {
+    LOGGER.debug("Player: " + username);
 
     // TODO: Validate on client side (JavaScript)
     if (username == null || password == null) {
       throw new RegistrationException("User cannot be null or empty");
-    }
-
-    // TODO: Validate on client side (JavaScript)
-    if (!password.equalsIgnoreCase(passwordConfirmation)) {
-      throw new RegistrationException("Passwords are not the same");
     }
 
     if (playerDao == null) {
@@ -51,15 +46,17 @@ public class PlayerService {
       if (player != null) {
         message = "Player " + username + " already exists";
       }
+      // create a user only in case it does not already exists
     } catch (NoResultException e) {
       try {
-        playerDao.create(username, password);
+        // all registered users belong to a group (i.e. black players)
+        playerDao.create(username, password, Colour.BLACK.toString());
       } catch (DAOException e1) {
         throw new ServiceException(e1.getMessage());
       }
       message = "Player successfully registered";
     } catch (NoUniqueResultException e) {
-      throw new RegistrationException(e.getMessage() + ". Please contact administrator.");
+      throw new RegistrationException(e.getMessage() + ". Please contact system administrator.");
     } catch (DAOException e) {
       throw new ServiceException(e.getMessage());
     }

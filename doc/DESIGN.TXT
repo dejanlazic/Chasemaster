@@ -1,11 +1,32 @@
-* Registration & Login - Hibernate persistence
+Layers:
 
-* Game - JDBC (?)
+* Web
+ - MVC
+ - Ajax
+
+* Service
+
+* DB persistence: JDBC, prepared statements, DAO design pattern
+
+---
 
 * Because all clients must wait until the last one sends his movement (to be able to choose winning movement before returning response to clients), I'll have to implement either stateful WS (EJB or Spring?) (preferred) or asynchronous WS + reading response from file/MOM (queue).
+- see Journal #5 for details about Asynchronous Ajax details (instead of WS)
+
+
+* Required (prerequisites):
+
+- Java JRE 6
+- Tomcat 7
+- MySQL RDBMS 5
+- Internet browser which supports CSS 3: FF v?, IE v?, Chrome v?
 
 
 
-* Required:
+* 2 types of players:
+- single (doesn't require registration; winner form a current match stays); starts as WHITE
+- group (requires registration, registered player automatically put in GROUP); starts as BLACK
 
-Browser which supports CSS 3: FF v?, IE v?, Chrome v?
+* 2 Servlets
+- Central Controller: MVC pattern (basic functinalities)
+- Game: asynchronous servlet that handles Ajax reqests and postponed responses (server push technology)

@@ -68,11 +68,12 @@ public class AuthenticationDAOImpl extends AuthenticationDAO {
         int id = rs.getInt("id");
         String uName = rs.getString("username");
         String pwd = rs.getString("password");
-        LOGGER.info("Selected user: [id=" + id + ", uName=" + uName + ", pwd=" + pwd+ "]");
         
         player = new Player();
         player.setId(id);
         player.setUsername(uName);
+        
+        LOGGER.info("User authenticated. " + player);
       }
       con.commit();
 

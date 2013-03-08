@@ -8,9 +8,9 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
+import com.chasemaster.Colour;
 import com.chasemaster.exception.NoResultException;
 import com.chasemaster.exception.NoUniqueResultException;
-import com.chasemaster.exception.PlayerException;
 import com.chasemaster.persistence.DAOException;
 import com.chasemaster.persistence.PlayerDAO;
 import com.chasemaster.persistence.db.DBConfig;
@@ -36,9 +36,9 @@ public class PlayerDAOImpl extends PlayerDAO {
   }
 
   @Override
-  public void create(String username, String password) throws DAOException {
-    final String sql = "INSERT INTO players (username, password, registered_on)"
-        + " VALUES (?, ?, ?)";
+  public void create(String username, String password, String colour) throws DAOException {
+    final String sql = "INSERT INTO players (username, password, colour, registered_on)"
+        + " VALUES (?, ?, ?, ?)";
 
     Connection con = null;
     PreparedStatement stmt = null;
@@ -49,10 +49,11 @@ public class PlayerDAOImpl extends PlayerDAO {
 
       stmt.setString(1, username);
       stmt.setString(2, password);
+      stmt.setString(3, colour);
       // convert Java Date to SQL Date
       java.util.Date currDate = new Date();
       java.sql.Date sqlcurrDate = new java.sql.Date(currDate.getTime());
-      stmt.setDate(3, sqlcurrDate);
+      stmt.setDate(4, sqlcurrDate);
 
       stmt.executeUpdate();
 
@@ -110,12 +111,11 @@ public class PlayerDAOImpl extends PlayerDAO {
 
         int id = rs.getInt("id");
         String uName = rs.getString("username");
-        String fName = rs.getString("first_name");
-        String lName = rs.getString("last_name");
+        String colour = rs.getString("colour");
 
-        player = new Player(id, uName, fName, lName);
+        player = new Player(id, uName, Colour.forString(colour));
 
-        LOGGER.info("Selected Player[id=" + id + ", fName=" + fName + ", lName=" + lName + "]");
+        LOGGER.info("Selected: " + player);
       }
       con.commit();
 

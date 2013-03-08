@@ -18,8 +18,7 @@ CREATE TABLE players (
 	id INTEGER NOT NULL AUTO_INCREMENT, 
 	username VARCHAR(20) NOT NULL,
 	password VARCHAR(20) NOT NULL,
-   	first_name VARCHAR(20),
-   	last_name VARCHAR(20),
+   	colour VARCHAR(10) NOT NULL,
 	registered_on DATE,
 	PRIMARY KEY (id)
 )engine=innodb;	
@@ -58,4 +57,3 @@ DESC players;
 -- GRANT ALL ON frp.* TO 'frpadmin'@'localhost';
 
 -- SELECT * FROM mysql.user WHERE User = 'frpadmin' and  Host = 'localhost';
-
