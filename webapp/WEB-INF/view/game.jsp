@@ -110,20 +110,25 @@
 							<div class="cell cellLettersLast white">h</div>
 						</div>
 					</div> <!-- gridLetters -->
-			
-					<div id="message" class="message" />
 		      </td>
 		
-		      <!-- Testing column - Use it later for table with users and their movements  -->
-		      <td> 
-		         <b>Context path:</b> ${pageContext.request.contextPath} <br/>
+		      <!-- Performed movements column (make a table) -->
+		      <td align="left" valign="top">
+              <div id="message" class="message" /> 
+		      </td>
+	      <tr>
+
+          <tr>
+            <!-- Testing column - Use it later for table with users and their movements  -->
+            <td>			
+               <b>Context path:</b> ${pageContext.request.contextPath} <br/>
                 <!-- display cookie -->
                 <b>User ID:</b> <c:out value="${cookie.playerId.value}" /> <br/>
                 <!-- input type="hidden" id="playerid" name="playerid" value="${requestScope.playerId}" / -->
                 <input id="playerid" name="playerid" value="${requestScope.playerId}" />
-		         <p id="debug"></p>
-		      </td>
-	      <tr>
+               <p id="debug"></p>
+            </td>
+          </tr>
       </table>
 
 
@@ -148,7 +153,8 @@
                         
                         // write given response
                         var contentElement = document.getElementById("message");
-                        contentElement.innerHTML = xmlRequest.responseText + contentElement.innerHTML;
+                        //contentElement.innerHTML = xmlRequest.responseText + contentElement.innerHTML;
+                        contentElement.innerHTML = xmlRequest.responseText;
                     }
                 }
                 

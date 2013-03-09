@@ -14,6 +14,7 @@ import com.chasemaster.persistence.DAOException;
 import com.chasemaster.persistence.db.DBConfig;
 import com.chasemaster.persistence.db.DBUtil;
 import com.chasemaster.persistence.model.Player;
+import com.chasemaster.Colour;
 
 /**
  * An implementation of the UserDAO that uses MySQL JDBC.
@@ -66,12 +67,11 @@ public class AuthenticationDAOImpl extends AuthenticationDAO {
         rs.next();
 
         int id = rs.getInt("id");
-        String uName = rs.getString("username");
-        String pwd = rs.getString("password");
+        String uname = rs.getString("username");
+        //String pwd = rs.getString("password");
+        String colour = rs.getString("colour");
         
-        player = new Player();
-        player.setId(id);
-        player.setUsername(uName);
+        player = new Player(id, uname, Colour.forString(colour));
         
         LOGGER.info("User authenticated. " + player);
       }

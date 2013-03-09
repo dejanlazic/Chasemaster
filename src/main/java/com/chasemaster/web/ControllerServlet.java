@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 
 //import org.json.simple.JSONObject;
 
+import com.chasemaster.Movement;
 import com.chasemaster.exception.LoginException;
 import com.chasemaster.exception.RegistrationException;
 import com.chasemaster.persistence.db.DBConfig;
@@ -25,10 +26,10 @@ public class ControllerServlet extends HttpServlet implements PageConst {
   private static final long serialVersionUID = -6190407189326129661L;
   private static final Logger LOGGER = Logger.getLogger(ControllerServlet.class);
   private static final String INIT_PARAM_PLAYERS_NUM = "playersNum";
-  
+
   private ServletContext context;
   private HttpSession session;
-  
+
   private PlayerService playerService;
   private AuthenticationService authenticationService;
 
@@ -47,7 +48,7 @@ public class ControllerServlet extends HttpServlet implements PageConst {
     // put in context the initial number of group players
     context.setAttribute(INIT_PARAM_PLAYERS_NUM, config.getInitParameter(INIT_PARAM_PLAYERS_NUM));
     LOGGER.debug(INIT_PARAM_PLAYERS_NUM + "=" + context.getAttribute(INIT_PARAM_PLAYERS_NUM));
-    
+
     // get initialization parameters from the deployment descriptor (web.xml)
     String jdbcDriverClassName = config.getInitParameter("jdbcDriverClassName");
     String databaseUrl = config.getInitParameter("dbURL");
@@ -139,6 +140,7 @@ public class ControllerServlet extends HttpServlet implements PageConst {
     destinationPage = LOGIN_PAGE;
   }
 
+  @SuppressWarnings("unchecked")
   private void processLogin(HttpServletRequest request, HttpServletResponse response) {
     LOGGER.info("Authenticate a user");
     destinationPage = ERROR_PAGE;
@@ -153,14 +155,24 @@ public class ControllerServlet extends HttpServlet implements PageConst {
         request.setAttribute("errorMessage", "Unknown error. Please contact system administrator.");
       } else {
         LOGGER.info("User authenticated. Player[" + player.getId() + ", " + player.getUsername() + "]");
-        
+
         // cache userId on the client
         Cookie cookie = new Cookie("playerId", Integer.toString(player.getId()));
         response.addCookie(cookie);
         request.setAttribute("playerId", Integer.toString(player.getId()));
         LOGGER.debug("Sent cookie: " + cookie.getName() + "=" + cookie.getValue());
-        
-        // create a map with initial set of pieces (images) on a board
+
+        // cache all logged on players in session
+        Map<String, Player> players = (Map<String, Player>) session.getAttribute("players");
+        if (players == null) {
+          LOGGER.debug("No players in session, creating new players map");
+          players = new HashMap<String, Player>();
+        } 
+        players.put(Integer.toString(player.getId()), player);
+        session.setAttribute("players", players);
+        LOGGER.debug("Players map put in session, size: " + players.size());
+
+        // create and cache a map with initial set of pieces (images) on a board
         Map<String, String> pieces = new HashMap<String, String>();
         pieces.put("A8", "brook.gif");
         pieces.put("B8", "bknight.gif");
@@ -185,7 +197,7 @@ public class ControllerServlet extends HttpServlet implements PageConst {
         pieces.put("E2", "wpawn.gif");
         pieces.put("F2", "wpawn.gif");
         pieces.put("G2", "wpawn.gif");
-        pieces.put("H2", "wpawn.gif");        
+        pieces.put("H2", "wpawn.gif");
         pieces.put("A1", "wrook.gif");
         pieces.put("B1", "wknight.gif");
         pieces.put("C1", "wbishop.gif");
@@ -193,10 +205,10 @@ public class ControllerServlet extends HttpServlet implements PageConst {
         pieces.put("E1", "wking.gif");
         pieces.put("F1", "wbishop.gif");
         pieces.put("G1", "wknight.gif");
-        pieces.put("H1", "wrook.gif");        
+        pieces.put("H1", "wrook.gif");
         session.setAttribute("pieces", pieces);
-        
-        destinationPage = GAME_PAGE; 
+
+        destinationPage = GAME_PAGE;
       }
     } catch (ServiceException e) {
       // TODO Do something to fix this

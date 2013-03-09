@@ -28,7 +28,7 @@ public class Movement {
 
   @Override
   public String toString() {
-    return "Movement [from=" + from + ", to=" + to + "]";
+    return "Movement[from=" + from + ", to=" + to + "]";
   }
 
   @Override

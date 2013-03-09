@@ -77,7 +77,7 @@ public class Player implements Serializable {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("Player [");
+    StringBuilder sb = new StringBuilder("Player[");
     sb.append("id=" + id);
     sb.append(", username=" + username);
     // sb.append(", firstName=" + firstName);

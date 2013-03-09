@@ -16,11 +16,13 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
 import com.chasemaster.Movement;
 import com.chasemaster.exception.NoObjectInContextException;
+import com.chasemaster.persistence.model.Player;
 import com.chasemaster.util.GameHelper;
 import com.mgs.chess.core.Location;
 
@@ -33,7 +35,8 @@ public class GameServlet extends HttpServlet {
   private static final Logger LOGGER = Logger.getLogger(GameServlet.class);
 
   private List<AsyncContext> contexts = new LinkedList<AsyncContext>();
-  ServletContext context;
+  private ServletContext context;
+  private HttpSession session;
 
   // all active players' ids and their movements
   private Map<String, Movement> playerMovementPairs = new HashMap<String, Movement>();
@@ -70,7 +73,7 @@ public class GameServlet extends HttpServlet {
       LOGGER.debug("Hidden playerid: " + request.getParameter("playerid"));
       
       // TEST
-      LOGGER.debug("contexts.size: " + this.contexts.size());
+      LOGGER.debug("Contexts size: " + this.contexts.size());
       Cookie[] cookies = request.getCookies();
       for (Cookie cookie : cookies) {
         if ("playerId".equals(cookie.getName())) {
@@ -86,10 +89,13 @@ public class GameServlet extends HttpServlet {
    * NOTE: Check here if all remaining (100 initially, but configurable)
    * requests arrived before sending responses.
    */
+  @SuppressWarnings("unchecked")
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     if ("move".equalsIgnoreCase(request.getParameter("operation"))) {
-      LOGGER.debug("contexts.size: " + this.contexts.size());
+      // get current or create new session object
+      session = request.getSession(true);
+      LOGGER.debug("Contexts size: " + this.contexts.size());
 
       // put player id and belonging movement to a map
       // NOTE: use hidden field instead of cookie because older firefox does not handle cookies well
@@ -103,14 +109,27 @@ public class GameServlet extends HttpServlet {
       for (Cookie cookie : cookies) {
         if ("playerId".equals(cookie.getName())) {
           playerId = cookie.getValue();
-          LOGGER.debug("Cookie = " + cookie.getName() + "=" + playerId);
-          //break;
+          LOGGER.debug("Cookie: " + cookie.getName() + "=" + playerId);
+          break;
         }
       }
       LOGGER.debug("Cookie playerid=" + playerId + ": " + positionFrom + "," + positionTo);
       LOGGER.debug("Hidden playerid=" + hiddenPlayerId + ": " + positionFrom + "," + positionTo);
       
-      
+      //playerMovementPairs.put(playerId, positionTo);
+      Location from = Location.forString(positionFrom);
+      Location to = Location.forString(positionTo);
+      LOGGER.debug("Locations converted: " + from + ", " + to);
+
+      // get a player from session
+      Map<String, Player> players = (Map<String, Player>) session.getAttribute("players");
+      if (players == null) {
+        LOGGER.error("No players in session, creating new players map");
+        // TODO Throw exception
+      } 
+      Player player = players.get(hiddenPlayerId);
+      LOGGER.debug("Logged on player (in session): " + player);
+
 //      Map<String, String> playerMovementPairs = null;
 //      ServletContext context = request.getSession().getServletContext();
 //      if (context.getAttribute("playerMovementPairs") == null) {
@@ -125,29 +144,29 @@ public class GameServlet extends HttpServlet {
 //        context.setAttribute("playerMovementPairs", playerMovementPairs);
 //      }
 
-      //playerMovementPairs.put(playerId, positionTo);
-      Location from = Location.forString(positionFrom);
-      Location to = Location.forString(positionTo);
-      LOGGER.debug("Locations converted: " + from + ", " + to);
-      
-      playerMovementPairs.put(hiddenPlayerId, new Movement(from, to, new Long(0))); // TODO Count duration
 
-      // Check if all remaining (100 initially, but configurable), active users (requests) arrived before sending responses
+      if(helper.isTurnWhite() && player.isWhite()) {
+        LOGGER.debug("Current turn: WHITE");
+        
+        // TODO: check if movement is valid before putting it in a map
+        playerMovementPairs.put(hiddenPlayerId, new Movement(from, to, new Long(0))); // TODO Count duration
+      } else if(!helper.isTurnWhite() && !player.isWhite()) {
+        LOGGER.debug("Current turn: BLACK");
+        
+        // TODO: check if movement is valid before putting it in a map
+        playerMovementPairs.put(hiddenPlayerId, new Movement(from, to, new Long(0))); // TODO Count duration
+      }
+
+      // Check if all remaining (100 initially, but configurable), 
+      // active users (requests) arrived before sending responses
       
       int numberOfMovements = playerMovementPairs.size();
-      int numberOfActivePlayers = Integer.parseInt((String)context.getAttribute(INIT_PARAM_PLAYERS_NUM));
-      
+      // initial (configured) number of players, will be reduced as number of black players decreases
+      int numberOfActivePlayers = Integer.parseInt((String)context.getAttribute(INIT_PARAM_PLAYERS_NUM));      
       LOGGER.debug("numberOfMovements: " + numberOfMovements);
       LOGGER.debug("numberOfActivePlayers: " + numberOfActivePlayers);
-
       
-      if(helper.isTurnWhite() && numberOfMovements == 1) {
-        LOGGER.debug("Current turn: WHITE");
-      } else if(!helper.isTurnWhite() && numberOfMovements == numberOfActivePlayers) {
-        LOGGER.debug("Current turn: BLACK");
-      }
-      
-      if (numberOfMovements == numberOfActivePlayers) {
+      if ( (helper.isTurnWhite() && numberOfMovements == 1) || (!helper.isTurnWhite() && numberOfMovements == numberOfActivePlayers) ) {
         // get a safe local copy of the list of AsyncContext
         List<AsyncContext> asyncContexts = new ArrayList<AsyncContext>(this.contexts);
         // clear the common list to prevent a pending request to be notified twice
@@ -156,24 +175,35 @@ public class GameServlet extends HttpServlet {
         // process all given movements
         //context = request.getSession().getServletContext();
         //playerMovementPairs = (Map<String, String>) context.getAttribute("playerMovementPairs");
-        String htmlMessage = "";
+        
+        String htmlMessage = "<table border=\"1\">";
+        htmlMessage += "<tr>";
+        htmlMessage += "<th rowspan=\"2\">Username</th>";
+        htmlMessage += "<th colspan=\"2\">Movement</th>";
+        htmlMessage += "</tr>";
+        htmlMessage += "<tr>";
+        htmlMessage += "<th width=\"10px\">From</th>";
+        htmlMessage += "<th width=\"10px\">To</th>";
+        htmlMessage += "</tr>";        
         for(Map.Entry<String, Movement> entry : playerMovementPairs.entrySet()) {
           LOGGER.debug("From playerMovementPairs: " + entry.getKey() + ", " + entry.getValue());
-          htmlMessage += "<b>User id:</b> " + entry.getKey() + ", <b>Position to:</b> " + entry.getValue() + "</br>";
+          // TODO: Return JSON instead of HTML and username instead of id
+          // TODO: Determine winning movements and hide the rest (grey rows)
+          htmlMessage += "<tr><td>" + entry.getKey() + "</td><td>" + entry.getValue().getFrom() + "</td><td>" + entry.getValue().getTo() + "</td></tr>";
         }
+        htmlMessage += "</table>";
         
-        // TODO: analyse movements
+        // TODO: analyze all movements
         //  1) maximum number of same field
         //    1b) if 2 or more fields with the same number of movements, take least total movements time
         // TODO: write movements in database
-        // TODO: clear map
-        
-        
+                
         try {
           LOGGER.debug(TURN_WHITE + ": " + helper.isTurnWhite());
-          helper.changeTurn();
+          helper.changeTurn(); // switch colour for the next turn
+          playerMovementPairs.clear(); // clear list of performed movements
         } catch (NoObjectInContextException e) {
-          // TODO FATAL system error - check code!
+          // TODO FATAL system error (check code) - exit the game
           LOGGER.error("Object " + e.getMessage() + " not found in context");
         }
         
