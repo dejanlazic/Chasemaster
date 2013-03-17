@@ -26,11 +26,6 @@ public class PieceOnLocation{
 	}
 
 	@Override
-	public String toString() {
-		return "PieceInBoard [location=" + location	+ ", piece=" + piece + "]";
-	}
-
-	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -65,4 +60,9 @@ public class PieceOnLocation{
 	public boolean isOnInitialRow() {
 		return getColor().getInitialRowFor(getType()) == getLocation().getCoordinateY();
 	}
+	
+	 @Override
+	  public String toString() {
+	    return "PieceInBoard [location=" + location + ", piece=" + piece + "]";
+	  }
 }

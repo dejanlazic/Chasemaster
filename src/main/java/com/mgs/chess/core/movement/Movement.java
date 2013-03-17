@@ -6,14 +6,22 @@ import com.mgs.chess.core.Piece;
 import com.mgs.chess.core.PieceOnLocation;
 
 public class Movement {
-  private final Piece piece;
-  private final Location from;
-  private final Location to;
+  private Piece piece;
+  private Location from;
+  private Location to;
+  private Long duration;
 
   public Movement(Piece piece, Location from, Location to) {
     this.piece = piece;
     this.from = from;
     this.to = to;
+  }
+
+  public Movement(Piece piece, Location from, Location to, Long duration) {
+    this.piece = piece;
+    this.from = from;
+    this.to = to;
+    this.duration = duration;
   }
 
   public Movement(PieceOnLocation pieceInBoard, Location locationTo) {
@@ -32,9 +40,14 @@ public class Movement {
     return to;
   }
 
+  public Long getDuration() {
+    return duration;
+  }
+
+
   @Override
   public String toString() {
-    return "Movement [from=" + from + ", piece=" + piece + ", to=" + to + "]";
+    return "Movement[piece=" + piece + ", " + "from=" + from + ", to=" + to + "]";
   }
 
   @Override

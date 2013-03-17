@@ -20,11 +20,14 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
-import com.chasemaster.Movement;
 import com.chasemaster.exception.NoObjectInContextException;
 import com.chasemaster.persistence.model.Player;
 import com.chasemaster.util.GameHelper;
+import com.mgs.chess.core.ChessBoard;
 import com.mgs.chess.core.Location;
+import com.mgs.chess.core.Piece;
+import com.mgs.chess.core.PieceNotFoundException;
+import com.mgs.chess.core.movement.Movement;
 
 import static com.chasemaster.util.GameConst.*;
 
@@ -70,6 +73,7 @@ public class GameServlet extends HttpServlet {
       asyncContext.setTimeout(10 * 60 * 1000); // 10 minutes
       contexts.add(asyncContext);
 
+      LOGGER.debug("====================");
       LOGGER.debug("Hidden playerid: " + request.getParameter("playerid"));
       
       // TEST
@@ -95,31 +99,40 @@ public class GameServlet extends HttpServlet {
     if ("move".equalsIgnoreCase(request.getParameter("operation"))) {
       // get current or create new session object
       session = request.getSession(true);
+      LOGGER.debug("====================");
       LOGGER.debug("Contexts size: " + this.contexts.size());
 
+      /*
+       * Input parameters
+       */
+      
       // put player id and belonging movement to a map
       // NOTE: use hidden field instead of cookie because older firefox does not handle cookies well
       // if more than one instance of FF is running
       
       String positionFrom = request.getParameter("positionFrom");
       String positionTo = request.getParameter("positionTo");
-      String hiddenPlayerId = request.getParameter("playerid"); // from hidden field
-      String playerId = ""; // from cookie
+      String playerId = request.getParameter("playerid"); // from hidden field
+      String playerIdCookie = ""; // from cookie
       Cookie[] cookies = request.getCookies();
       for (Cookie cookie : cookies) {
         if ("playerId".equals(cookie.getName())) {
-          playerId = cookie.getValue();
-          LOGGER.debug("Cookie: " + cookie.getName() + "=" + playerId);
+          playerIdCookie = cookie.getValue();
+          LOGGER.debug("Cookie: " + cookie.getName() + "=" + playerIdCookie);
           break;
         }
       }
-      LOGGER.debug("Cookie playerid=" + playerId + ": " + positionFrom + "," + positionTo);
-      LOGGER.debug("Hidden playerid=" + hiddenPlayerId + ": " + positionFrom + "," + positionTo);
+      LOGGER.debug("Cookie playerId=" + playerIdCookie + ": " + positionFrom + "," + positionTo);
+      LOGGER.debug("Hidden playerId=" + playerId + ": " + positionFrom + "," + positionTo);
       
-      //playerMovementPairs.put(playerId, positionTo);
-      Location from = Location.forString(positionFrom);
-      Location to = Location.forString(positionTo);
-      LOGGER.debug("Locations converted: " + from + ", " + to);
+      /*
+       * Chess objects
+       */
+      Location locationFrom = Location.forString(positionFrom);
+      Location locationTo = Location.forString(positionTo);
+      Piece piece = helper.getPiece(locationFrom);
+      LOGGER.debug("converted locations: " + locationFrom + " -> " + locationTo);
+      LOGGER.debug("Piece moved: " + piece);
 
       // get a player from session
       Map<String, Player> players = (Map<String, Player>) session.getAttribute("players");
@@ -127,7 +140,7 @@ public class GameServlet extends HttpServlet {
         LOGGER.error("No players in session, creating new players map");
         // TODO Throw exception
       } 
-      Player player = players.get(hiddenPlayerId);
+      Player player = players.get(playerId);
       LOGGER.debug("Logged on player (in session): " + player);
 
 //      Map<String, String> playerMovementPairs = null;
@@ -144,18 +157,14 @@ public class GameServlet extends HttpServlet {
 //        context.setAttribute("playerMovementPairs", playerMovementPairs);
 //      }
 
-
-      if(helper.isTurnWhite() && player.isWhite()) {
-        LOGGER.debug("Current turn: WHITE");
+      if((helper.isTurnWhite() && player.isWhite()) 
+          || (!helper.isTurnWhite() && !player.isWhite())) {
+        LOGGER.debug("Current turn: " + (helper.isTurnWhite()? "WHITE" : "BLACK"));
         
         // TODO: check if movement is valid before putting it in a map
-        playerMovementPairs.put(hiddenPlayerId, new Movement(from, to, new Long(0))); // TODO Count duration
-      } else if(!helper.isTurnWhite() && !player.isWhite()) {
-        LOGGER.debug("Current turn: BLACK");
-        
-        // TODO: check if movement is valid before putting it in a map
-        playerMovementPairs.put(hiddenPlayerId, new Movement(from, to, new Long(0))); // TODO Count duration
-      }
+        ChessBoard board = helper.getBoard();
+        playerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, new Long(0))); // TODO Count movement duration
+      } 
 
       // Check if all remaining (100 initially, but configurable), 
       // active users (requests) arrived before sending responses
@@ -166,7 +175,34 @@ public class GameServlet extends HttpServlet {
       LOGGER.debug("numberOfMovements: " + numberOfMovements);
       LOGGER.debug("numberOfActivePlayers: " + numberOfActivePlayers);
       
-      if ( (helper.isTurnWhite() && numberOfMovements == 1) || (!helper.isTurnWhite() && numberOfMovements == numberOfActivePlayers) ) {
+      // if all players moved
+      if ((helper.isTurnWhite() && numberOfMovements == 1) 
+          || (!helper.isTurnWhite() && numberOfMovements == numberOfActivePlayers)) {
+        /*
+         * TODO: determine winning movement
+         */
+        Movement winningMovement = helper.determineWinningMovement(playerMovementPairs);
+        LOGGER.debug("Winning movement: " + winningMovement);
+        
+        /*
+         * make movement on the board
+         */
+        ChessBoard newBoard = helper.getBoard().performMovement(winningMovement);
+        try {
+          LOGGER.debug("Piece on " + locationFrom + ": " + newBoard.getPieceOnLocation(locationFrom));
+        } catch(PieceNotFoundException e) {
+          LOGGER.debug("Piece on " + locationFrom + " not found on the board");
+        }
+        try {
+          LOGGER.debug("Piece on " + locationTo + ": " + newBoard.getPieceOnLocation(locationTo));
+        } catch(PieceNotFoundException e) {
+          LOGGER.debug("Piece on " + locationTo + " not found on the board");
+        }
+        
+        /*
+         * send response to all players
+         */
+        
         // get a safe local copy of the list of AsyncContext
         List<AsyncContext> asyncContexts = new ArrayList<AsyncContext>(this.contexts);
         // clear the common list to prevent a pending request to be notified twice
@@ -200,6 +236,7 @@ public class GameServlet extends HttpServlet {
                 
         try {
           LOGGER.debug(TURN_WHITE + ": " + helper.isTurnWhite());
+          
           helper.changeTurn(); // switch colour for the next turn
           playerMovementPairs.clear(); // clear list of performed movements
         } catch (NoObjectInContextException e) {
@@ -226,6 +263,5 @@ public class GameServlet extends HttpServlet {
         }
       }
     }
-  }
-    
+  }    
 }

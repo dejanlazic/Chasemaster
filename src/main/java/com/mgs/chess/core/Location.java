@@ -35,6 +35,7 @@ public enum Location {
 			xAsString = "H";
 		}
 		String asString = xAsString + y;
+		
 		return Location.valueOf(asString);
 	}
 
@@ -68,4 +69,9 @@ public enum Location {
 	public Location add(int deltaX, int deltaY) {
 		return Location.forCoordinates(getCoordinateX() + deltaX, getCoordinateY() + deltaY);
 	}
+
+  @Override
+  public String toString() {
+    return super.toString();
+  }
 }

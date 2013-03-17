@@ -2,35 +2,40 @@ package com.mgs.chess.core;
 
 
 public enum Piece implements SquareContent{
-	WHITE_ROOK (PieceType.ROOK, Color.WHITE),
-	WHITE_QUEEN (PieceType.QUEEN, Color.WHITE),
-	WHITE_KING (PieceType.KING, Color.WHITE),
-	WHITE_KNIGHT (PieceType.KNIGHT, Color.WHITE),
-	WHITE_PAWN (PieceType.PAWN, Color.WHITE),
-	WHITE_BISHOP (PieceType.BISHOP, Color.WHITE),
+	WHITE_ROOK (PieceType.ROOK, Color.WHITE, "wrook.gif"),
+	WHITE_QUEEN (PieceType.QUEEN, Color.WHITE, "wqueen.gif"),
+	WHITE_KING (PieceType.KING, Color.WHITE, "wking.gif"),
+	WHITE_KNIGHT (PieceType.KNIGHT, Color.WHITE, "wknight.gif"),
+	WHITE_PAWN (PieceType.PAWN, Color.WHITE, "wpawn.gif"),
+	WHITE_BISHOP (PieceType.BISHOP, Color.WHITE, "wbishop.gif"),
 	
-	BLACK_ROOK (PieceType.ROOK, Color.BLACK),
-	BLACK_QUEEN (PieceType.QUEEN, Color.BLACK),
-	BLACK_KING (PieceType.KING, Color.BLACK), 
-	BLACK_KNIGHT (PieceType.KNIGHT, Color.BLACK), 
-	BLACK_PAWN (PieceType.PAWN, Color.BLACK), 
-	BLACK_BISHOP (PieceType.BISHOP, Color.BLACK),
-	;
+	BLACK_ROOK (PieceType.ROOK, Color.BLACK, "brook.gif"),
+	BLACK_QUEEN (PieceType.QUEEN, Color.BLACK, "bqueen.gif"),
+	BLACK_KING (PieceType.KING, Color.BLACK, "bking.gif"), 
+	BLACK_KNIGHT (PieceType.KNIGHT, Color.BLACK, "bknight.gif"), 
+	BLACK_PAWN (PieceType.PAWN, Color.BLACK, "bpawn.gif"), 
+	BLACK_BISHOP (PieceType.BISHOP, Color.BLACK, "bbishop.gif");
 	
 	private final PieceType type;
 	private final Color color;
+	private final String imageName;
 
-	private Piece(PieceType type, Color color) {
+	private Piece(PieceType type, Color color, String imageName) {
 		this.type = type;
 		this.color = color;
+		this.imageName = imageName;
 	}
-
+	
 	public PieceType getType() {
 		return type;
 	}
 
 	public Color getColor() {
 		return color;
+	}
+	
+	public String getImageName() {
+	  return imageName;
 	}
 
 	public PieceOnLocation on(Location location) {
@@ -83,4 +88,9 @@ public enum Piece implements SquareContent{
 	public boolean colorIs(Color color) {
 		return getColor() == color;
 	}
+
+//  @Override
+//  public String toString() {
+//    return "Piece[" + type + " " + color + "]";
+//  }
 }
