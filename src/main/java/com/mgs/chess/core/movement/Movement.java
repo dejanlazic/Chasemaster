@@ -10,18 +10,24 @@ public class Movement {
   private Location from;
   private Location to;
   private Long duration;
+  private String playerId;
 
   public Movement(Piece piece, Location from, Location to) {
-    this.piece = piece;
-    this.from = from;
-    this.to = to;
+    this(piece, from, to, null, null);
   }
 
   public Movement(Piece piece, Location from, Location to, Long duration) {
+    this(piece, from, to, duration, null);
+  }
+
+  public Movement(Piece piece, Location from, Location to, Long duration, String playerId) {
+    super();
+    
     this.piece = piece;
     this.from = from;
     this.to = to;
     this.duration = duration;
+    this.playerId = playerId;
   }
 
   public Movement(PieceOnLocation pieceInBoard, Location locationTo) {
@@ -44,10 +50,17 @@ public class Movement {
     return duration;
   }
 
+  public String getPlayerId() {
+    return playerId;
+  }
+
+  public void setPlayerId(String playerId) {
+    this.playerId = playerId;
+  }
 
   @Override
   public String toString() {
-    return "Movement[piece=" + piece + ", " + "from=" + from + ", to=" + to + "]";
+    return "Movement[piece=" + piece + ", " + "from=" + from + ", to=" + to + ", playerId=" + playerId +"]";
   }
 
   @Override

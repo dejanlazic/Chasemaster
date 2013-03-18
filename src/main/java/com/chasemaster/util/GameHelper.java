@@ -1,5 +1,6 @@
 package com.chasemaster.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -128,39 +129,76 @@ public class GameHelper {
     return boardImages;
   }
   
-  // TODO: Implement
-  public Movement determineWinningMovement(Map<String, Movement> playerMovementPairs) {
-    Movement movement = null;
-
+  /*
+   * Returns winning movements, determining in the way:
+   *   1) field which contains the biggest number of movements
+   *   2) in case of 2 or more fields with the same number of movements, 
+   *   movements with the shortest total perform time are winning 
+   */
+  public List<Movement> findWinningMovements(Map<String, Movement> playerMovementPairs) {
+    List<Movement> winningMovements = null;
+    
     /*
-     * Contains both user id and movement, only for this purpose
+     * Converts player-movement map to list of movements grouped by FROM-TO fields combination.
+     * NOTE: Only TO is not enough because one TO field can be target by movements 
+     * from different FROM fields. 
      */
-    class UserMovement {
-      private final String userId;
-      private final Movement movement;
-      
-      public UserMovement(String userId, Movement movement) {
-        this.userId = userId;
-        this.movement = movement;
-      }
-
-      public String getUserId() {
-        return userId;
-      }
-      public Movement getMovement() {
-        return movement;
-      }         
-    }
-
-    // contains list of all movements, grouped by TO field
-    Map<String, UserMovement> movementsByLocation = new HashMap<String, UserMovement>();
+    
+    Map<String, List<Movement>> movementsByLocation = new HashMap<String, List<Movement>>();   
     
     for(Map.Entry<String, Movement> entry : playerMovementPairs.entrySet()) {
       LOGGER.debug("From playerMovementPairs: " + entry.getKey() + ", " + entry.getValue());
       
-      movement = entry.getValue();
+      String from = entry.getValue().getFrom().toString();
+      String to = entry.getValue().getTo().toString();
+      String fromto = from + to;
+      
+      List<Movement> userMovements = movementsByLocation.get(fromto);
+      if(userMovements == null) {
+        userMovements = new ArrayList<Movement>();
+      }
+      userMovements.add(entry.getValue());
+      movementsByLocation.put(fromto, userMovements);
     }
     
-    return movement;
+    // 1) go over all fields and test number of belonging movements
+    int maxNumOfMovementsPerField = 0;
+    List<String> winFields = null;
+    for(Map.Entry<String, List<Movement>> entry : movementsByLocation.entrySet()) {
+      LOGGER.debug("Grouped movements by locations=" + entry.getKey() + ", numOfMoves=" + entry.getValue().size());
+      
+      // found more movements - create new list 
+      if(entry.getValue().size() > maxNumOfMovementsPerField) {
+        LOGGER.debug("Found more identical movements " + entry.getKey() + "; before: " + maxNumOfMovementsPerField + ", now: " + entry.getValue().size());
+        maxNumOfMovementsPerField = entry.getValue().size();
+        winFields = new ArrayList<String>();
+        winFields.add(entry.getKey());
+        // found movements - add location to existing list
+      } else if(entry.getValue().size() == maxNumOfMovementsPerField) {
+        LOGGER.debug("Found same num of identical movements: " + entry.getKey());
+        winFields.add(entry.getKey());
+      }
+    }
+    
+    // TODO Handle exception?
+    if(winFields == null) {
+      LOGGER.error("Problem in detecting a winning field");
+      System.exit(0);
+    }
+    
+    // if there is only one fields combination, belonging movements are winning
+    if(winFields.size() == 1) {
+      LOGGER.debug("There is 1 winning fields combination: " + winFields.get(0));
+      winningMovements = movementsByLocation.get(winFields.get(0));
+      // otherwise shortest total time of movements per fields must be counted 
+    } else {
+      LOGGER.debug("There are " + winFields.size() + " winning fields combinations: " + winFields);
+      
+      for(String fromto : winFields) {
+        winningMovements = movementsByLocation.get(fromto);
+      }
+    }
+    
+    return winningMovements;
   }
 }

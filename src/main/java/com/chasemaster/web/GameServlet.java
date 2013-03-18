@@ -163,7 +163,7 @@ public class GameServlet extends HttpServlet {
         
         // TODO: check if movement is valid before putting it in a map
         ChessBoard board = helper.getBoard();
-        playerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, new Long(0))); // TODO Count movement duration
+        playerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, new Long(0), playerId)); // TODO Count movement duration
       } 
 
       // Check if all remaining (100 initially, but configurable), 
@@ -179,25 +179,25 @@ public class GameServlet extends HttpServlet {
       if ((helper.isTurnWhite() && numberOfMovements == 1) 
           || (!helper.isTurnWhite() && numberOfMovements == numberOfActivePlayers)) {
         /*
-         * TODO: determine winning movement
+         * Determine winning movement
          */
-        Movement winningMovement = helper.determineWinningMovement(playerMovementPairs);
-        LOGGER.debug("Winning movement: " + winningMovement);
+        List<Movement> winningMovements = helper.findWinningMovements(playerMovementPairs);
+        LOGGER.debug("Determined winning movements: " + winningMovements);
         
         /*
          * make movement on the board
          */
-        ChessBoard newBoard = helper.getBoard().performMovement(winningMovement);
-        try {
-          LOGGER.debug("Piece on " + locationFrom + ": " + newBoard.getPieceOnLocation(locationFrom));
-        } catch(PieceNotFoundException e) {
-          LOGGER.debug("Piece on " + locationFrom + " not found on the board");
-        }
-        try {
-          LOGGER.debug("Piece on " + locationTo + ": " + newBoard.getPieceOnLocation(locationTo));
-        } catch(PieceNotFoundException e) {
-          LOGGER.debug("Piece on " + locationTo + " not found on the board");
-        }
+//        ChessBoard newBoard = helper.getBoard().performMovement(winningMovement);
+//        try {
+//          LOGGER.debug("Piece on " + locationFrom + ": " + newBoard.getPieceOnLocation(locationFrom));
+//        } catch(PieceNotFoundException e) {
+//          LOGGER.debug("Piece on " + locationFrom + " not found on the board");
+//        }
+//        try {
+//          LOGGER.debug("Piece on " + locationTo + ": " + newBoard.getPieceOnLocation(locationTo));
+//        } catch(PieceNotFoundException e) {
+//          LOGGER.debug("Piece on " + locationTo + " not found on the board");
+//        }
         
         /*
          * send response to all players
