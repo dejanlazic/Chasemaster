@@ -118,13 +118,17 @@ function extractNumber(value) {
 
 function sendMoves() {
   _debug.innerHTML = _debug.innerHTML + "<br/>In sendMoves(" + positionFrom + ", " + positionTo + ")";
-
+  var d = new Date();
+  var tms = d.getTime(); // in milliseconds
+  //var tutc = d.toUTCString();
+  //_debug.innerHTML = _debug.innerHTML + "<br/>In sendMoves - date:" + d + ", " + tms;
+  
   // var url = "/Chasemaster/AjaxResponse?positionFrom=" + escape(positionFrom) + "&positionTo=" + escape(positionTo);
   //var url = "/Chasemaster/async?positionFrom=" + escape(positionFrom) + "&positionTo=" + escape(positionTo);
   //var url = "async.do?positionFrom=" + escape(positionFrom) + "&positionTo=" + escape(positionTo);
   //var url = "asyncsend.do?t=" + new Date() + "&positionFrom=" + escape(positionFrom) + "&positionTo=" + escape(positionTo);
   //var url = "asyncsend.do?t=" + new Date();
-  var url = "Game?t=" + new Date();
+  var url = "Game?t=" + d;
 
   var xmlRequest = null;                
   if (window.XMLHttpRequest) {
@@ -137,8 +141,8 @@ function sendMoves() {
   xmlRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   //xmlRequest.onreadystatechange = callback;
   //xmlRequest.send(null);
-  //alert("hiddenPlayerId: " + _hiddenPlayerId.value);
-  xmlRequest.send("operation=move&positionFrom=" + escape(positionFrom) + "&positionTo=" + escape(positionTo) + "&playerid=" + escape(_hiddenPlayerId.value));
+  
+  xmlRequest.send("operation=move&positionFrom=" + escape(positionFrom) + "&positionTo=" + escape(positionTo) + "&playerid=" + escape(_hiddenPlayerId.value)  + "&tms=" + escape(tms));
 }
 
 // implemented in game.jsp#getMessages()

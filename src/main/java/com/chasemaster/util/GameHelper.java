@@ -140,8 +140,10 @@ public class GameHelper {
     
     /*
      * Converts player-movement map to list of movements grouped by FROM-TO fields combination.
+     * 
      * NOTE: Only TO is not enough because one TO field can be target by movements 
-     * from different FROM fields. 
+     * from different FROM fields, therefore to identify distinguish identical movements
+     * both FROM and TO fields must be used in combination. 
      */
     
     Map<String, List<Movement>> movementsByLocation = new HashMap<String, List<Movement>>();   
@@ -153,27 +155,27 @@ public class GameHelper {
       String to = entry.getValue().getTo().toString();
       String fromto = from + to;
       
-      List<Movement> userMovements = movementsByLocation.get(fromto);
-      if(userMovements == null) {
-        userMovements = new ArrayList<Movement>();
+      List<Movement> movementsFromTo = movementsByLocation.get(fromto);
+      if(movementsFromTo == null) {
+        movementsFromTo = new ArrayList<Movement>();
       }
-      userMovements.add(entry.getValue());
-      movementsByLocation.put(fromto, userMovements);
+      movementsFromTo.add(entry.getValue());
+      movementsByLocation.put(fromto, movementsFromTo);
     }
     
     // 1) go over all fields and test number of belonging movements
-    int maxNumOfMovementsPerField = 0;
+    int maxNumOfMovementsPerField = Integer.MIN_VALUE;
     List<String> winFields = null;
     for(Map.Entry<String, List<Movement>> entry : movementsByLocation.entrySet()) {
       LOGGER.debug("Grouped movements by locations=" + entry.getKey() + ", numOfMoves=" + entry.getValue().size());
       
-      // found more movements - create new list 
+      // found more movements - reset list 
       if(entry.getValue().size() > maxNumOfMovementsPerField) {
         LOGGER.debug("Found more identical movements " + entry.getKey() + "; before: " + maxNumOfMovementsPerField + ", now: " + entry.getValue().size());
         maxNumOfMovementsPerField = entry.getValue().size();
         winFields = new ArrayList<String>();
         winFields.add(entry.getKey());
-        // found movements - add location to existing list
+        // found same num of movements - add location to existing list
       } else if(entry.getValue().size() == maxNumOfMovementsPerField) {
         LOGGER.debug("Found same num of identical movements: " + entry.getKey());
         winFields.add(entry.getKey());
@@ -186,7 +188,8 @@ public class GameHelper {
       System.exit(0);
     }
     
-    // if there is only one fields combination, belonging movements are winning
+    // if there is only one fields combination (i.e. one identical movement by all players), 
+    // belonging movements are winning
     if(winFields.size() == 1) {
       LOGGER.debug("There is 1 winning fields combination: " + winFields.get(0));
       winningMovements = movementsByLocation.get(winFields.get(0));
@@ -196,6 +199,10 @@ public class GameHelper {
       
       for(String fromto : winFields) {
         winningMovements = movementsByLocation.get(fromto);
+        
+        for(Movement winningMovement : winningMovements) {
+          LOGGER.debug("Measuring duration: " + winningMovement.getDuration());
+        }
       }
     }
     

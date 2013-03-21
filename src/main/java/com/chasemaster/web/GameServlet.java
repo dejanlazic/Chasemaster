@@ -2,7 +2,10 @@ package com.chasemaster.web;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -54,6 +57,10 @@ public class GameServlet extends HttpServlet {
     context.setAttribute(INIT_PARAM_PLAYERS_NUM, config.getInitParameter(INIT_PARAM_PLAYERS_NUM));
     // current colour on move (starting with WHITE)
     context.setAttribute(TURN_WHITE, new Boolean(true));
+    // this time is used to measure durations of all BLACK movements to find a group
+    // with the shortest movements; since the first move is WHITE, time is not important and can be set in init,
+    // but all other times during a match it is reset before sending response to all players  
+    context.setAttribute(START_TIME, new Date());
     
     helper = new GameHelper(context);
   }
@@ -112,6 +119,15 @@ public class GameServlet extends HttpServlet {
       
       String positionFrom = request.getParameter("positionFrom");
       String positionTo = request.getParameter("positionTo");
+      String t = request.getParameter("t");
+      LOGGER.debug("Parameter - time: " + t);
+      String tms = request.getParameter("tms");
+      long endTimeMS = Long.parseLong(tms);
+      LOGGER.debug("End time: " + endTimeMS);
+      Date startTime = (Date)context.getAttribute(START_TIME);
+      long startTimeMS = startTime.getTime();
+      LOGGER.debug("Start time: " + startTimeMS);
+      LOGGER.debug("Duration: " + (endTimeMS - startTimeMS));
       String playerId = request.getParameter("playerid"); // from hidden field
       String playerIdCookie = ""; // from cookie
       Cookie[] cookies = request.getCookies();
@@ -163,7 +179,7 @@ public class GameServlet extends HttpServlet {
         
         // TODO: check if movement is valid before putting it in a map
         ChessBoard board = helper.getBoard();
-        playerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, new Long(0), playerId)); // TODO Count movement duration
+        playerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS-startTimeMS, playerId));
       } 
 
       // Check if all remaining (100 initially, but configurable), 
@@ -239,6 +255,7 @@ public class GameServlet extends HttpServlet {
           
           helper.changeTurn(); // switch colour for the next turn
           playerMovementPairs.clear(); // clear list of performed movements
+          context.setAttribute(START_TIME, new Date()); // reset start time
         } catch (NoObjectInContextException e) {
           // TODO FATAL system error (check code) - exit the game
           LOGGER.error("Object " + e.getMessage() + " not found in context");
