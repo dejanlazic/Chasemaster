@@ -238,10 +238,23 @@ public class GameServlet extends HttpServlet {
         htmlMessage += "<th width=\"10px\">To</th>";
         htmlMessage += "</tr>";        
         for(Map.Entry<String, Movement> entry : playerMovementPairs.entrySet()) {
-          LOGGER.debug("From playerMovementPairs: " + entry.getKey() + ", " + entry.getValue());
+          LOGGER.debug("All movements from playerMovementPairs: " + entry.getKey() + ", " + entry.getValue());
           // TODO: Return JSON instead of HTML and username instead of id
-          // TODO: Determine winning movements and hide the rest (grey rows)
-          htmlMessage += "<tr><td>" + entry.getKey() + "</td><td>" + entry.getValue().getFrom() + "</td><td>" + entry.getValue().getTo() + "</td></tr>";
+
+          
+          // Determine winning movements and mark them
+          boolean found = false; 
+          for(Movement winningMovement : winningMovements) {
+            if(entry.getKey().equals(winningMovement.getPlayerId())) {
+              found = true;
+            }
+          }
+          
+          if(found) {
+            htmlMessage += "<tr bgcolor=\"FF0000\"><td>" + entry.getKey() + "</td><td>" + entry.getValue().getFrom() + "</td><td>" + entry.getValue().getTo() + "</td></tr>";   
+          } else {
+            htmlMessage += "<tr><td>" + entry.getKey() + "</td><td>" + entry.getValue().getFrom() + "</td><td>" + entry.getValue().getTo() + "</td></tr>";            
+          }
         }
         htmlMessage += "</table>";
         

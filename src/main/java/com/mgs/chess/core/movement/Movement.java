@@ -60,7 +60,7 @@ public class Movement {
 
   @Override
   public String toString() {
-    return "Movement[piece=" + piece + ", " + "from=" + from + ", to=" + to + ", playerId=" + playerId +"]";
+    return "Movement[piece=" + piece + ", " + "from=" + from + ", to=" + to + ", playerId=" + playerId + ", duration=" + duration + "]";
   }
 
   @Override

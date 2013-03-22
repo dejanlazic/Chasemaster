@@ -197,12 +197,22 @@ public class GameHelper {
     } else {
       LOGGER.debug("There are " + winFields.size() + " winning fields combinations: " + winFields);
       
+      long totalDuration = Long.MAX_VALUE;
+      List<Movement> tempWinningMovements = null;
       for(String fromto : winFields) {
-        winningMovements = movementsByLocation.get(fromto);
+        tempWinningMovements = movementsByLocation.get(fromto);
+        long totalDurationPerGroup = 0;
         
-        for(Movement winningMovement : winningMovements) {
-          LOGGER.debug("Measuring duration: " + winningMovement.getDuration());
+        for(Movement tempWinningMovement : tempWinningMovements) {
+          LOGGER.debug("Measuring duration: " + tempWinningMovement.getDuration());
+          totalDurationPerGroup += tempWinningMovement.getDuration();
         }
+        
+        if(totalDurationPerGroup < totalDuration) {
+          winningMovements = tempWinningMovements;
+          totalDuration = totalDurationPerGroup;
+        }
+        LOGGER.debug("Chosen winning fields combination: " + winningMovements.get(0).getFrom() + winningMovements.get(0).getTo());
       }
     }
     
