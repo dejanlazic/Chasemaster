@@ -26,15 +26,18 @@ public class GameHelper {
   private static final Logger LOGGER = Logger.getLogger(GameHelper.class);
   
   private ServletContext context;
-  private ChessReader chessReader = new ChessReaderImpl();
+  private ChessReader chessReader;
   private ChessAnaliserImpl chessAnaliser;
   
   public GameHelper() {
     super();
+    
+    chessReader = new ChessReaderImpl();
+    chessAnaliser = new ChessAnaliserImpl(chessReader);
   }
 
   public GameHelper(ServletContext context) {
-    super();
+    this();
     this.context = context;
   }
 
@@ -55,8 +58,6 @@ public class GameHelper {
   }
   
   public ChessBoard prepareBoard () {
-    chessAnaliser = new ChessAnaliserImpl(chessReader);
-    
     ChessBoard board = new ChessBoard().
       addPiece(Piece.WHITE_ROOK,  Location.A1).
       addPiece(Piece.WHITE_KNIGHT, Location.B1).
@@ -128,7 +129,25 @@ public class GameHelper {
     
     return boardImages;
   }
-  
+    
+  public boolean isMovementValid(Location locationFrom, Location locationTo) {
+    ChessBoard board = getBoard();
+    
+    LOGGER.debug("-> findReachableLocations for location " + locationFrom + ": " + board.getPieceOnLocation(locationFrom));
+    
+    List<Location> reachablePositions = chessAnaliser.findReachableLocations(
+        board.getPieceOnLocation(locationFrom), board, null);
+    for (Location reachablePosition : reachablePositions) {
+      LOGGER.debug(reachablePosition.getCoordinateX() + "," + reachablePosition.getCoordinateY() + " ("
+          + Location.forCoordinates(reachablePosition.getCoordinateX(), reachablePosition.getCoordinateY()) + ")");
+      if(locationTo.equals(reachablePosition)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
   /*
    * Returns winning movements, determining in the way:
    *   1) field which contains the biggest number of movements

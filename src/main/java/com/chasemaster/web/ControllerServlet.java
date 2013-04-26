@@ -80,9 +80,9 @@ public class ControllerServlet extends HttpServlet implements PageConst {
       LOGGER.error(e.getMessage());
       errMsg = e.getMessage();
     }
-    
+
     helper = new GameHelper(context);
-    
+
     context.setAttribute(CHESSBOARD, helper.prepareBoard());
     context.setAttribute(CHESSBOARD_IMAGES, helper.getBoardImages());
   }
@@ -103,7 +103,7 @@ public class ControllerServlet extends HttpServlet implements PageConst {
     response.setContentType("text/html;charset=UTF-8");
 
     String logicalName = request.getServletPath();
-    logicalName = logicalName.substring(logicalName.lastIndexOf('/') + 1, logicalName.indexOf('.'));    
+    logicalName = logicalName.substring(logicalName.lastIndexOf('/') + 1, logicalName.indexOf('.'));
     LOGGER.debug("====================");
     LOGGER.debug("logicalName: " + logicalName);
 
@@ -128,6 +128,11 @@ public class ControllerServlet extends HttpServlet implements PageConst {
         processRegistrationPage();
       } else if ("register".equals(logicalName)) {
         processRegister(request);
+      } else if ("test".equals(logicalName)) {
+        LOGGER.debug("---------->>>>>>>>>");
+
+        response.getWriter().write("SOMETHING");
+        //response.getWriter().flush();
       } else {
         request.setAttribute("errorMessage", "Unknown action");
       }
@@ -136,7 +141,8 @@ public class ControllerServlet extends HttpServlet implements PageConst {
     LOGGER.info("Destination page: " + destinationPage);
 
     // AJAX does NOT use dispatching, so exclude Ajax calls
-    if (!logicalName.equals("async") && !logicalName.equals("asyncstart") && !logicalName.equals("asyncsend")) {
+    //if (!logicalName.equals("async") && !logicalName.equals("asyncstart") && !logicalName.equals("asyncsend")) {
+    if (!logicalName.equals("test")) {
       RequestDispatcher rd = getServletContext().getRequestDispatcher(destinationPage);
       rd.forward(request, response);
     }
@@ -176,46 +182,46 @@ public class ControllerServlet extends HttpServlet implements PageConst {
         if (players == null) {
           LOGGER.debug("No players in session, creating new players map");
           players = new HashMap<String, Player>();
-        } 
+        }
         players.put(Integer.toString(player.getId()), player);
         session.setAttribute("players", players);
         LOGGER.debug("Players map put in session, size: " + players.size());
 
-//        // create and cache a map with initial set of pieces (images) on a board
-//        Map<String, String> pieces = new HashMap<String, String>();
-//        pieces.put("A8", "brook.gif");
-//        pieces.put("B8", "bknight.gif");
-//        pieces.put("C8", "bbishop.gif");
-//        pieces.put("D8", "bqueen.gif");
-//        pieces.put("E8", "bking.gif");
-//        pieces.put("F8", "bbishop.gif");
-//        pieces.put("G8", "bknight.gif");
-//        pieces.put("H8", "brook.gif");
-//        pieces.put("A7", "bpawn.gif");
-//        pieces.put("B7", "bpawn.gif");
-//        pieces.put("C7", "bpawn.gif");
-//        pieces.put("D7", "bpawn.gif");
-//        pieces.put("E7", "bpawn.gif");
-//        pieces.put("F7", "bpawn.gif");
-//        pieces.put("G7", "bpawn.gif");
-//        pieces.put("H7", "bpawn.gif");
-//        pieces.put("A2", "wpawn.gif");
-//        pieces.put("B2", "wpawn.gif");
-//        pieces.put("C2", "wpawn.gif");
-//        pieces.put("D2", "wpawn.gif");
-//        pieces.put("E2", "wpawn.gif");
-//        pieces.put("F2", "wpawn.gif");
-//        pieces.put("G2", "wpawn.gif");
-//        pieces.put("H2", "wpawn.gif");
-//        pieces.put("A1", "wrook.gif");
-//        pieces.put("B1", "wknight.gif");
-//        pieces.put("C1", "wbishop.gif");
-//        pieces.put("D1", "wqueen.gif");
-//        pieces.put("E1", "wking.gif");
-//        pieces.put("F1", "wbishop.gif");
-//        pieces.put("G1", "wknight.gif");
-//        pieces.put("H1", "wrook.gif");
-//        session.setAttribute("pieces", pieces);
+        // // create and cache a map with initial set of pieces (images) on a board
+        // Map<String, String> pieces = new HashMap<String, String>();
+        // pieces.put("A8", "brook.gif");
+        // pieces.put("B8", "bknight.gif");
+        // pieces.put("C8", "bbishop.gif");
+        // pieces.put("D8", "bqueen.gif");
+        // pieces.put("E8", "bking.gif");
+        // pieces.put("F8", "bbishop.gif");
+        // pieces.put("G8", "bknight.gif");
+        // pieces.put("H8", "brook.gif");
+        // pieces.put("A7", "bpawn.gif");
+        // pieces.put("B7", "bpawn.gif");
+        // pieces.put("C7", "bpawn.gif");
+        // pieces.put("D7", "bpawn.gif");
+        // pieces.put("E7", "bpawn.gif");
+        // pieces.put("F7", "bpawn.gif");
+        // pieces.put("G7", "bpawn.gif");
+        // pieces.put("H7", "bpawn.gif");
+        // pieces.put("A2", "wpawn.gif");
+        // pieces.put("B2", "wpawn.gif");
+        // pieces.put("C2", "wpawn.gif");
+        // pieces.put("D2", "wpawn.gif");
+        // pieces.put("E2", "wpawn.gif");
+        // pieces.put("F2", "wpawn.gif");
+        // pieces.put("G2", "wpawn.gif");
+        // pieces.put("H2", "wpawn.gif");
+        // pieces.put("A1", "wrook.gif");
+        // pieces.put("B1", "wknight.gif");
+        // pieces.put("C1", "wbishop.gif");
+        // pieces.put("D1", "wqueen.gif");
+        // pieces.put("E1", "wking.gif");
+        // pieces.put("F1", "wbishop.gif");
+        // pieces.put("G1", "wknight.gif");
+        // pieces.put("H1", "wrook.gif");
+        // session.setAttribute("pieces", pieces);
 
         destinationPage = GAME_PAGE;
       }

@@ -11,7 +11,7 @@ div#main {
 	margin-right: auto;	
 }
 
-#grid
+#board
 {
 	width: 400px;
 	height: 400px;
@@ -20,7 +20,7 @@ div#main {
 	clear: both;
 }
 
-#gridLetters
+#boardLetters
 {
 	width: 400px;
 	height: 50px;

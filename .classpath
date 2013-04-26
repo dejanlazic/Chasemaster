@@ -4,7 +4,6 @@
 	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
-	<classpathentry kind="lib" path="webapp/WEB-INF/lib/json_simple.jar"/>
 	<classpathentry kind="lib" path="webapp/WEB-INF/lib/jstl.jar"/>
 	<classpathentry kind="lib" path="webapp/WEB-INF/lib/log4j-1.2.14.jar"/>
 	<classpathentry kind="lib" path="webapp/WEB-INF/lib/mysql-connector-java-5.1.6-bin.jar"/>
@@ -13,5 +12,6 @@
 	<classpathentry kind="lib" path="lib/servlet-30/servlet-api-3.0.jar"/>
 	<classpathentry kind="lib" path="lib/test/mockito-all-1.8.5.jar"/>
 	<classpathentry kind="lib" path="lib/test/testng-5.14.6.jar"/>
+	<classpathentry kind="lib" path="webapp/WEB-INF/lib/json-simple-1.1.1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

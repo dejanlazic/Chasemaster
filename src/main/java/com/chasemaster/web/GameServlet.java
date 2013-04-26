@@ -2,8 +2,6 @@ package com.chasemaster.web;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,9 +27,9 @@ import com.chasemaster.util.GameHelper;
 import com.mgs.chess.core.ChessBoard;
 import com.mgs.chess.core.Location;
 import com.mgs.chess.core.Piece;
-import com.mgs.chess.core.PieceNotFoundException;
 import com.mgs.chess.core.movement.Movement;
-
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import static com.chasemaster.util.GameConst.*;
 
 @SuppressWarnings("serial")
@@ -46,6 +44,7 @@ public class GameServlet extends HttpServlet {
 
   // all active players' ids and their movements
   private Map<String, Movement> playerMovementPairs = new HashMap<String, Movement>();
+  private int numberOfFalseMovements = 0;
   private GameHelper helper;
 
   public void init(ServletConfig config) throws ServletException {
@@ -81,17 +80,7 @@ public class GameServlet extends HttpServlet {
       contexts.add(asyncContext);
 
       LOGGER.debug("====================");
-      LOGGER.debug("Hidden playerid: " + request.getParameter("playerid"));
-      
-      // TEST
-      LOGGER.debug("Contexts size: " + this.contexts.size());
-      Cookie[] cookies = request.getCookies();
-      for (Cookie cookie : cookies) {
-        if ("playerId".equals(cookie.getName())) {
-          LOGGER.debug("Cookie: " + cookie.getName() + "=" + cookie.getValue());
-          break;
-        }
-      }      
+      LOGGER.debug("playerid: " + request.getParameter("playerid"));
     }
   }
 
@@ -129,17 +118,7 @@ public class GameServlet extends HttpServlet {
       LOGGER.debug("Start time: " + startTimeMS);
       LOGGER.debug("Duration: " + (endTimeMS - startTimeMS));
       String playerId = request.getParameter("playerid"); // from hidden field
-      String playerIdCookie = ""; // from cookie
-      Cookie[] cookies = request.getCookies();
-      for (Cookie cookie : cookies) {
-        if ("playerId".equals(cookie.getName())) {
-          playerIdCookie = cookie.getValue();
-          LOGGER.debug("Cookie: " + cookie.getName() + "=" + playerIdCookie);
-          break;
-        }
-      }
-      LOGGER.debug("Cookie playerId=" + playerIdCookie + ": " + positionFrom + "," + positionTo);
-      LOGGER.debug("Hidden playerId=" + playerId + ": " + positionFrom + "," + positionTo);
+      LOGGER.debug("playerId=" + playerId + ": " + positionFrom + "," + positionTo);
       
       /*
        * Chess objects
@@ -177,15 +156,19 @@ public class GameServlet extends HttpServlet {
           || (!helper.isTurnWhite() && !player.isWhite())) {
         LOGGER.debug("Current turn: " + (helper.isTurnWhite()? "WHITE" : "BLACK"));
         
-        // TODO: check if movement is valid before putting it in a map
-        ChessBoard board = helper.getBoard();
-        playerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS-startTimeMS, playerId));
+        // check if movement is valid before putting it in a map
+        if(helper.isMovementValid(locationFrom, locationTo)) { 
+          playerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS-startTimeMS, playerId));
+        } else {
+          ++numberOfFalseMovements;
+        }
       } 
+      LOGGER.debug("numberOfFalseMovements: " + numberOfFalseMovements);
 
       // Check if all remaining (100 initially, but configurable), 
       // active users (requests) arrived before sending responses
-      
-      int numberOfMovements = playerMovementPairs.size();
+            
+      int numberOfMovements = playerMovementPairs.size() + numberOfFalseMovements;
       // initial (configured) number of players, will be reduced as number of black players decreases
       int numberOfActivePlayers = Integer.parseInt((String)context.getAttribute(INIT_PARAM_PLAYERS_NUM));      
       LOGGER.debug("numberOfMovements: " + numberOfMovements);
@@ -199,6 +182,17 @@ public class GameServlet extends HttpServlet {
          */
         List<Movement> winningMovements = helper.findWinningMovements(playerMovementPairs);
         LOGGER.debug("Determined winning movements: " + winningMovements);
+        
+        // make JSON result
+        JSONObject jsonResponse = new JSONObject();
+        jsonResponse.put("movementFrom", winningMovements.get(0).getFrom());
+        jsonResponse.put("movementTo", winningMovements.get(0).getTo());
+        JSONArray list = new JSONArray();
+        for(Movement winningMovement : winningMovements) {
+          list.add(winningMovement.getPlayerId());
+        }       
+        jsonResponse.put("players", list);
+        LOGGER.debug("JSON: " + jsonResponse.toJSONString());
         
         /*
          * make movement on the board
@@ -282,7 +276,9 @@ public class GameServlet extends HttpServlet {
             LOGGER.debug("Before returning: " + htmlMessage);
 
             PrintWriter writer = asyncContext.getResponse().getWriter();
-            writer.println(htmlMessage);
+            // TODO: put htmlMessage
+            // writer.println(htmlMessage);
+            writer.println(jsonResponse.toJSONString());
             writer.flush();
 
             // complete queued requests
@@ -292,6 +288,6 @@ public class GameServlet extends HttpServlet {
           }
         }
       }
-    }
-  }    
+    }    
+  }  
 }

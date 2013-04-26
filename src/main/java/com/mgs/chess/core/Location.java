@@ -14,7 +14,7 @@ public enum Location {
 	    return Location.valueOf(location);
 	  }
 
-	public static Location forCoordinates (int x, int y){
+	public static Location forCoordinates (int x, int y) {
 		if (x < 1 || x > 8 || y < 1 || y > 8) return null;
 		String xAsString = null;
 		if (x == 1){
@@ -73,5 +73,5 @@ public enum Location {
   @Override
   public String toString() {
     return super.toString();
-  }
+  }   
 }
