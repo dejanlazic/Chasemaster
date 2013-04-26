@@ -131,10 +131,11 @@
 
 
       <script>
+        <!--
         // call AFTER page is loaded
         window.onload = init; 
         
-        <!-- AJAX call to register async communication in servlet, and wait until a message is posted --> 
+        // AJAX call to register async communication in servlet, and wait until a message is posted  
 
         var messagesWaiting = false;  
               
@@ -150,8 +151,32 @@
                         clearPositions();
                         
                         // write given response                        
-                        document.getElementById("message").innerHTML = xmlRequest.responseText;
-                        alert(moved);
+                        //document.getElementById("message").innerHTML = xmlRequest.responseText;
+                        var isWinner = '';                        
+                        var content = '<table><thead>';
+                        content += '<tr><th>From</th>';
+                        content += '<th>To</th>';
+                        content += '<th>ID</th>';
+                        content += '</tr></thead><tbody>';
+                        var data = eval('(' + xmlRequest.responseText + ')');
+                        var movementFrom = data.movementFrom;
+                        var movementTo = data.movementTo;
+                        var players = data.players;
+                        for(var i = 0; i < players.length; i++) {
+                          content += '<tr><td>' + movementFrom + '</td>';
+                          content += '<td>' + movementTo + '</td>';
+                          content += '<td>' + players[i] + '</td></tr>';
+
+                          if(players[i] == document.getElementById("playerid").value) {
+                            isWinner += document.getElementById("playerid").value + ' is winner.'
+                          }
+                        }
+                        content += '</tbody></table>';
+
+                        document.getElementById("message").innerHTML = content;
+                        document.getElementById("message").innerHTML = document.getElementById("message").innerHTML + "<br/>" + isWinner;
+                        
+                        return false;
                     }
                 }
                 
@@ -161,6 +186,7 @@
         }
         
         setInterval(getMessages, 1000);
+      -->
       </script>
 	</body>
 </html>

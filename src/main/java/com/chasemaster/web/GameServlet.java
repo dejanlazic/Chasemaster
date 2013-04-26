@@ -185,8 +185,8 @@ public class GameServlet extends HttpServlet {
         
         // make JSON result
         JSONObject jsonResponse = new JSONObject();
-        jsonResponse.put("movementFrom", winningMovements.get(0).getFrom());
-        jsonResponse.put("movementTo", winningMovements.get(0).getTo());
+        jsonResponse.put("movementFrom", winningMovements.get(0).getFrom().toString());
+        jsonResponse.put("movementTo", winningMovements.get(0).getTo().toString());
         JSONArray list = new JSONArray();
         for(Movement winningMovement : winningMovements) {
           list.add(winningMovement.getPlayerId());
