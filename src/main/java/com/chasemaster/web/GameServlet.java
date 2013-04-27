@@ -13,7 +13,6 @@ import javax.servlet.AsyncContext;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,7 +23,6 @@ import org.apache.log4j.Logger;
 import com.chasemaster.exception.NoObjectInContextException;
 import com.chasemaster.persistence.model.Player;
 import com.chasemaster.util.GameHelper;
-import com.mgs.chess.core.ChessBoard;
 import com.mgs.chess.core.Location;
 import com.mgs.chess.core.Piece;
 import com.mgs.chess.core.movement.Movement;
@@ -44,7 +42,7 @@ public class GameServlet extends HttpServlet {
 
   // all active players' ids and their movements
   private Map<String, Movement> playerMovementPairs = new HashMap<String, Movement>();
-  private int numberOfFalseMovements = 0;
+  private Map<String, Movement> failedPlayerMovementPairs = new HashMap<String, Movement>();
   private GameHelper helper;
 
   public void init(ServletConfig config) throws ServletException {
@@ -160,15 +158,15 @@ public class GameServlet extends HttpServlet {
         if(helper.isMovementValid(locationFrom, locationTo)) { 
           playerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS-startTimeMS, playerId));
         } else {
-          ++numberOfFalseMovements;
+          failedPlayerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS-startTimeMS, playerId));
         }
       } 
-      LOGGER.debug("numberOfFalseMovements: " + numberOfFalseMovements);
+      LOGGER.debug("numberOfFalseMovements: " + failedPlayerMovementPairs.size());
 
       // Check if all remaining (100 initially, but configurable), 
       // active users (requests) arrived before sending responses
             
-      int numberOfMovements = playerMovementPairs.size() + numberOfFalseMovements;
+      int numberOfMovements = playerMovementPairs.size() + failedPlayerMovementPairs.size();
       // initial (configured) number of players, will be reduced as number of black players decreases
       int numberOfActivePlayers = Integer.parseInt((String)context.getAttribute(INIT_PARAM_PLAYERS_NUM));      
       LOGGER.debug("numberOfMovements: " + numberOfMovements);
@@ -178,20 +176,34 @@ public class GameServlet extends HttpServlet {
       if ((helper.isTurnWhite() && numberOfMovements == 1) 
           || (!helper.isTurnWhite() && numberOfMovements == numberOfActivePlayers)) {
         /*
-         * Determine winning movement
+         * Determine both winning and losing movement
          */
-        List<Movement> winningMovements = helper.findWinningMovements(playerMovementPairs);
+        //List<Movement> winningMovements = helper.findWinningMovements(playerMovementPairs);
+        List<Movement> winningMovements = new ArrayList<Movement>();
+        List<Movement> losingMovements = new ArrayList<Movement>();
+        helper.findWinningMovements(winningMovements, losingMovements, playerMovementPairs, failedPlayerMovementPairs);
+        
         LOGGER.debug("Determined winning movements: " + winningMovements);
+        LOGGER.debug("Determined losing movements: " + losingMovements);
+        
+        if(winningMovements.size() < 1) {
+          // TODO: Exception
+        }
         
         // make JSON result
         JSONObject jsonResponse = new JSONObject();
         jsonResponse.put("movementFrom", winningMovements.get(0).getFrom().toString());
         jsonResponse.put("movementTo", winningMovements.get(0).getTo().toString());
-        JSONArray list = new JSONArray();
+        JSONArray winningList = new JSONArray();
         for(Movement winningMovement : winningMovements) {
-          list.add(winningMovement.getPlayerId());
+          winningList.add(winningMovement.getPlayerId());
         }       
-        jsonResponse.put("players", list);
+        jsonResponse.put("winningPlayers", winningList);
+        JSONArray losingList = new JSONArray();
+        for(Movement losingMovement : losingMovements) {
+          losingList.add(losingMovement.getPlayerId());
+        }       
+        jsonResponse.put("losingPlayers", losingList);
         LOGGER.debug("JSON: " + jsonResponse.toJSONString());
         
         /*
@@ -222,36 +234,6 @@ public class GameServlet extends HttpServlet {
         //context = request.getSession().getServletContext();
         //playerMovementPairs = (Map<String, String>) context.getAttribute("playerMovementPairs");
         
-        String htmlMessage = "<table border=\"1\">";
-        htmlMessage += "<tr>";
-        htmlMessage += "<th rowspan=\"2\">Username</th>";
-        htmlMessage += "<th colspan=\"2\">Movement</th>";
-        htmlMessage += "</tr>";
-        htmlMessage += "<tr>";
-        htmlMessage += "<th width=\"10px\">From</th>";
-        htmlMessage += "<th width=\"10px\">To</th>";
-        htmlMessage += "</tr>";        
-        for(Map.Entry<String, Movement> entry : playerMovementPairs.entrySet()) {
-          LOGGER.debug("All movements from playerMovementPairs: " + entry.getKey() + ", " + entry.getValue());
-          // TODO: Return JSON instead of HTML and username instead of id
-
-          
-          // Determine winning movements and mark them
-          boolean found = false; 
-          for(Movement winningMovement : winningMovements) {
-            if(entry.getKey().equals(winningMovement.getPlayerId())) {
-              found = true;
-            }
-          }
-          
-          if(found) {
-            htmlMessage += "<tr bgcolor=\"FF0000\"><td>" + entry.getKey() + "</td><td>" + entry.getValue().getFrom() + "</td><td>" + entry.getValue().getTo() + "</td></tr>";   
-          } else {
-            htmlMessage += "<tr><td>" + entry.getKey() + "</td><td>" + entry.getValue().getFrom() + "</td><td>" + entry.getValue().getTo() + "</td></tr>";            
-          }
-        }
-        htmlMessage += "</table>";
-        
         // TODO: analyze all movements
         //  1) maximum number of same field
         //    1b) if 2 or more fields with the same number of movements, take least total movements time
@@ -273,11 +255,7 @@ public class GameServlet extends HttpServlet {
          */
         for (AsyncContext asyncContext : asyncContexts) {
           try {
-            LOGGER.debug("Before returning: " + htmlMessage);
-
             PrintWriter writer = asyncContext.getResponse().getWriter();
-            // TODO: put htmlMessage
-            // writer.println(htmlMessage);
             writer.println(jsonResponse.toJSONString());
             writer.flush();
 

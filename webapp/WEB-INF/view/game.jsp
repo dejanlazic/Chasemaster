@@ -2,7 +2,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <html>
-
 	<head>
 		<title>Chasemaster: Game</title>
 
@@ -150,31 +149,48 @@
                         
                         clearPositions();
                         
-                        // write given response                        
-                        //document.getElementById("message").innerHTML = xmlRequest.responseText;
-                        var isWinner = '';                        
-                        var content = '<table><thead>';
+                        // write given response
+
+                        var data = eval('(' + xmlRequest.responseText + ')');                        
+                        var movementFrom = data.movementFrom;
+                        var movementTo = data.movementTo;
+
+                        var content = '<b>From:</b>' + movementFrom + '<br/>';                                   
+                        content += '<b>To  :</b>' + movementTo;
+                        content += '<h3>Winning players</h3>';           
+                        content += '<table><thead>';
                         content += '<tr><th>From</th>';
                         content += '<th>To</th>';
                         content += '<th>ID</th>';
                         content += '</tr></thead><tbody>';
-                        var data = eval('(' + xmlRequest.responseText + ')');
-                        var movementFrom = data.movementFrom;
-                        var movementTo = data.movementTo;
-                        var players = data.players;
+                        var players = data.winningPlayers;
                         for(var i = 0; i < players.length; i++) {
                           content += '<tr><td>' + movementFrom + '</td>';
                           content += '<td>' + movementTo + '</td>';
                           content += '<td>' + players[i] + '</td></tr>';
-
-                          if(players[i] == document.getElementById("playerid").value) {
-                            isWinner += document.getElementById("playerid").value + ' is winner.'
-                          }
                         }
                         content += '</tbody></table>';
 
+                        content += '<h3>Losing players</h3>';           
+                        content += '<table><thead>';
+                        content += '<tr><th>From</th>';
+                        content += '<th>To</th>';
+                        content += '<th>ID</th>';
+                        content += '</tr></thead><tbody>';
+                        var losingPlayers = data.losingPlayers;
+                        for(var j = 0; j < losingPlayers.length; j++) {
+                          content += '<tr><td>?' + '</td>';
+                          content += '<td>?' + '</td>';
+                          content += '<td>' + losingPlayers[j] + '</td></tr>';
+
+                          if(losingPlayers[j] == document.getElementById("playerid").value) {
+                            document.getElementById("board").style.display = 'none';
+                            document.getElementById("boardLetters").style.display = 'none';
+                          } 
+                        }
+                        content += '</tbody></table>';
+                        
                         document.getElementById("message").innerHTML = content;
-                        document.getElementById("message").innerHTML = document.getElementById("message").innerHTML + "<br/>" + isWinner;
                         
                         return false;
                     }
