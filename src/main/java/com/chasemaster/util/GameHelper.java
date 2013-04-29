@@ -62,15 +62,12 @@ public class GameHelper {
         Location.B1).addPiece(Piece.WHITE_BISHOP, Location.C1).addPiece(Piece.WHITE_KING, Location.D1).addPiece(
         Piece.WHITE_QUEEN, Location.E1).addPiece(Piece.WHITE_BISHOP, Location.F1).addPiece(Piece.WHITE_KNIGHT,
         Location.G1).addPiece(Piece.WHITE_ROOK, Location.H1).
-
     addPiece(Piece.WHITE_PAWN, Location.A2).addPiece(Piece.WHITE_PAWN, Location.B2).addPiece(Piece.WHITE_PAWN,
         Location.C2).addPiece(Piece.WHITE_PAWN, Location.D2).addPiece(Piece.WHITE_PAWN, Location.E2).addPiece(
         Piece.WHITE_PAWN, Location.F2).addPiece(Piece.WHITE_PAWN, Location.G2).addPiece(Piece.WHITE_PAWN, Location.H2).
-
     addPiece(Piece.BLACK_PAWN, Location.A7).addPiece(Piece.BLACK_PAWN, Location.B7).addPiece(Piece.BLACK_PAWN,
         Location.C7).addPiece(Piece.BLACK_PAWN, Location.D7).addPiece(Piece.BLACK_PAWN, Location.E7).addPiece(
         Piece.BLACK_PAWN, Location.F7).addPiece(Piece.BLACK_PAWN, Location.G7).addPiece(Piece.BLACK_PAWN, Location.H7).
-
     addPiece(Piece.BLACK_ROOK, Location.A8).addPiece(Piece.BLACK_KNIGHT, Location.B8).addPiece(Piece.BLACK_BISHOP,
         Location.C8).addPiece(Piece.BLACK_KING, Location.D8).addPiece(Piece.BLACK_QUEEN, Location.E8).addPiece(
         Piece.BLACK_BISHOP, Location.F8).addPiece(Piece.BLACK_KNIGHT, Location.G8).addPiece(Piece.BLACK_ROOK,

@@ -191,6 +191,9 @@
                         content += '</tbody></table>';
                         
                         document.getElementById("message").innerHTML = content;
+
+                        // move icon on the board
+                        var _img = document.getElementById(movementFrom);
                         
                         return false;
                     }
