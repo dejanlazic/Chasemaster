@@ -23,8 +23,10 @@ import org.apache.log4j.Logger;
 import com.chasemaster.exception.NoObjectInContextException;
 import com.chasemaster.persistence.model.Player;
 import com.chasemaster.util.GameHelper;
+import com.mgs.chess.core.ChessBoard;
 import com.mgs.chess.core.Location;
 import com.mgs.chess.core.Piece;
+import com.mgs.chess.core.PieceNotFoundException;
 import com.mgs.chess.core.movement.Movement;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -126,7 +128,7 @@ public class GameServlet extends HttpServlet {
       Location locationFrom = Location.forString(positionFrom);
       Location locationTo = Location.forString(positionTo);
       Piece piece = helper.getPiece(locationFrom);
-      LOGGER.debug("converted locations: " + locationFrom + " -> " + locationTo);
+      LOGGER.debug("Converted locations: " + locationFrom + " -> " + locationTo);
       LOGGER.debug("Piece moved: " + piece);
 
       // get a player from session
@@ -170,8 +172,6 @@ public class GameServlet extends HttpServlet {
       // active users (requests) arrived before sending responses
 
       int numberOfMovements = playerMovementPairs.size() + failedPlayerMovementPairs.size();
-      // initial (configured) number of players, will be reduced as number of black players decreases
-      // int numberOfActivePlayers = Integer.parseInt((String)context.getAttribute(INIT_PARAM_PLAYERS_NUM));
       LOGGER.debug("numberOfMovements: " + numberOfMovements);
       LOGGER.debug("numberOfActivePlayers: " + numberOfActivePlayers);
 
@@ -193,13 +193,37 @@ public class GameServlet extends HttpServlet {
           // TODO: Exception
         }
 
-        // initial (configured) number of black players is decreased
+        // decrease initial (configured) number of black players
         if (!helper.isTurnWhite()) {
           numberOfActivePlayers = winningMovements.size();
           LOGGER.debug("numberOfActivePlayers changed: " + numberOfActivePlayers);
         }
+
+        /*
+         * check if end of game
+         */
+        // TODO: Implement
         
-        // make JSON result
+        /*
+         * make movement on the board
+         */
+        Movement winMovement = winningMovements.get(0);
+        LOGGER.debug("Perform movement on board: " + winMovement);
+        ChessBoard newBoard = helper.getBoard().performMovement(winMovement);
+        try {
+          LOGGER.debug("Piece on " + locationFrom + ": " + newBoard.getPieceOnLocation(locationFrom));
+        } catch (PieceNotFoundException e) {
+          LOGGER.debug("Piece on " + locationFrom + " not found on the board");
+        }
+        try {
+          LOGGER.debug("Piece on " + locationTo + ": " + newBoard.getPieceOnLocation(locationTo));
+        } catch (PieceNotFoundException e) {
+          LOGGER.debug("Piece on " + locationTo + " not found on the board");
+        }
+
+        /*
+         * make JSON result
+         */
         JSONObject jsonResponse = new JSONObject();
         jsonResponse.put("movementFrom", winningMovements.get(0).getFrom().toString());
         jsonResponse.put("movementTo", winningMovements.get(0).getTo().toString());
@@ -215,20 +239,6 @@ public class GameServlet extends HttpServlet {
         jsonResponse.put("losingPlayers", losingList);
         LOGGER.debug("JSON: " + jsonResponse.toJSONString());
 
-        /*
-         * make movement on the board
-         */
-        // ChessBoard newBoard = helper.getBoard().performMovement(winningMovement);
-        // try {
-        // LOGGER.debug("Piece on " + locationFrom + ": " + newBoard.getPieceOnLocation(locationFrom));
-        // } catch(PieceNotFoundException e) {
-        // LOGGER.debug("Piece on " + locationFrom + " not found on the board");
-        // }
-        // try {
-        // LOGGER.debug("Piece on " + locationTo + ": " + newBoard.getPieceOnLocation(locationTo));
-        // } catch(PieceNotFoundException e) {
-        // LOGGER.debug("Piece on " + locationTo + " not found on the board");
-        // }
         /*
          * send response to all players
          */

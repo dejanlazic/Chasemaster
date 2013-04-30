@@ -134,96 +134,6 @@ public class GameHelper {
    * case of 2 or more fields with the same number of movements, movements with the shortest total perform time are
    * winning
    */
-  public List<Movement> findWinningMovements(Map<String, Movement> playerMovementPairs) {
-    List<Movement> winningMovements = null;
-
-    /*
-     * Converts player-movement map to list of movements grouped by FROM-TO fields combination.
-     * 
-     * NOTE: Only TO is not enough because one TO field can be target by movements from different FROM fields, therefore
-     * to identify distinguish identical movements both FROM and TO fields must be used in combination.
-     */
-
-    Map<String, List<Movement>> movementsByLocation = new HashMap<String, List<Movement>>();
-
-    for (Map.Entry<String, Movement> entry : playerMovementPairs.entrySet()) {
-      LOGGER.debug("From playerMovementPairs: " + entry.getKey() + ", " + entry.getValue());
-
-      String from = entry.getValue().getFrom().toString();
-      String to = entry.getValue().getTo().toString();
-      String fromto = from + to;
-
-      List<Movement> movementsFromTo = movementsByLocation.get(fromto);
-      if (movementsFromTo == null) {
-        movementsFromTo = new ArrayList<Movement>();
-      }
-      movementsFromTo.add(entry.getValue());
-      movementsByLocation.put(fromto, movementsFromTo);
-    }
-
-    // 1) go over all fields and test number of belonging movements
-    int maxNumOfMovementsPerField = Integer.MIN_VALUE;
-    List<String> winFields = null;
-    for (Map.Entry<String, List<Movement>> entry : movementsByLocation.entrySet()) {
-      LOGGER.debug("Grouped movements by locations=" + entry.getKey() + ", numOfMoves=" + entry.getValue().size());
-
-      // found more movements - reset list
-      if (entry.getValue().size() > maxNumOfMovementsPerField) {
-        LOGGER.debug("Found more identical movements " + entry.getKey() + "; before: " + maxNumOfMovementsPerField
-            + ", now: " + entry.getValue().size());
-        maxNumOfMovementsPerField = entry.getValue().size();
-        winFields = new ArrayList<String>();
-        winFields.add(entry.getKey());
-        // found same num of movements - add location to existing list
-      } else if (entry.getValue().size() == maxNumOfMovementsPerField) {
-        LOGGER.debug("Found same num of identical movements: " + entry.getKey());
-        winFields.add(entry.getKey());
-      }
-    }
-
-    // TODO Handle exception?
-    if (winFields == null) {
-      LOGGER.error("Problem in detecting a winning field");
-      System.exit(0);
-    }
-
-    // if there is only one fields combination (i.e. one identical movement by all players),
-    // belonging movements are winning
-    if (winFields.size() == 1) {
-      LOGGER.debug("There is 1 winning fields combination: " + winFields.get(0));
-      winningMovements = movementsByLocation.get(winFields.get(0));
-      // otherwise shortest total time of movements per fields must be counted
-    } else {
-      LOGGER.debug("There are " + winFields.size() + " winning fields combinations: " + winFields);
-
-      long totalDuration = Long.MAX_VALUE;
-      List<Movement> tempWinningMovements = null;
-      for (String fromto : winFields) {
-        tempWinningMovements = movementsByLocation.get(fromto);
-        long totalDurationPerGroup = 0;
-
-        for (Movement tempWinningMovement : tempWinningMovements) {
-          LOGGER.debug("Measuring duration: " + tempWinningMovement.getDuration());
-          totalDurationPerGroup += tempWinningMovement.getDuration();
-        }
-
-        if (totalDurationPerGroup < totalDuration) {
-          winningMovements = tempWinningMovements;
-          totalDuration = totalDurationPerGroup;
-        }
-        LOGGER.debug("Chosen winning fields combination: " + winningMovements.get(0).getFrom()
-            + winningMovements.get(0).getTo());
-      }
-    }
-
-    return winningMovements;
-  }
-
-  /*
-   * Returns winning movements, determining in the way: 1) field which contains the biggest number of movements 2) in
-   * case of 2 or more fields with the same number of movements, movements with the shortest total perform time are
-   * winning
-   */
   public void findWinningMovements(List<Movement> winningMovements, List<Movement> losingMovements,
       Map<String, Movement> playerMovementPairs, Map<String, Movement> failedPlayerMovementPairs) {
     /*
@@ -272,9 +182,9 @@ public class GameHelper {
         maxNumOfMovementsPerField = entry.getValue().size();
         winFields = new ArrayList<String>();
         winFields.add(entry.getKey());
-        // found same num of movements - add location to existing list
+        // found equal number of movements - add location to existing list
       } else if (entry.getValue().size() == maxNumOfMovementsPerField) {
-        LOGGER.debug("Found same num of identical movements: " + entry.getKey());
+        LOGGER.debug("Found equal number of identical movements: " + entry.getKey());
         winFields.add(entry.getKey());
       }
     }
