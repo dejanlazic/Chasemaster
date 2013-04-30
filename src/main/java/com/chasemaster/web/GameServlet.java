@@ -44,6 +44,7 @@ public class GameServlet extends HttpServlet {
   private Map<String, Movement> playerMovementPairs = new HashMap<String, Movement>();
   private Map<String, Movement> failedPlayerMovementPairs = new HashMap<String, Movement>();
   private GameHelper helper;
+  int numberOfActivePlayers = 0;
 
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
@@ -56,9 +57,12 @@ public class GameServlet extends HttpServlet {
     context.setAttribute(TURN_WHITE, new Boolean(true));
     // this time is used to measure durations of all BLACK movements to find a group
     // with the shortest movements; since the first move is WHITE, time is not important and can be set in init,
-    // but all other times during a match it is reset before sending response to all players  
+    // but all other times during a match it is reset before sending response to all players
     context.setAttribute(START_TIME, new Date());
-    
+
+    // this initial value will be decreasing in doPost() as a game progress
+    numberOfActivePlayers = Integer.parseInt((String) context.getAttribute(INIT_PARAM_PLAYERS_NUM));
+
     helper = new GameHelper(context);
   }
 
@@ -83,8 +87,7 @@ public class GameServlet extends HttpServlet {
   }
 
   /*
-   * Sending responses to all registered requests. 
-   * NOTE: Check here if all remaining (100 initially, but configurable)
+   * Sending responses to all registered requests. NOTE: Check here if all remaining (100 initially, but configurable)
    * requests arrived before sending responses.
    */
   @SuppressWarnings("unchecked")
@@ -99,11 +102,10 @@ public class GameServlet extends HttpServlet {
       /*
        * Input parameters
        */
-      
+
       // put player id and belonging movement to a map
       // NOTE: use hidden field instead of cookie because older firefox does not handle cookies well
       // if more than one instance of FF is running
-      
       String positionFrom = request.getParameter("positionFrom");
       String positionTo = request.getParameter("positionTo");
       String t = request.getParameter("t");
@@ -111,13 +113,13 @@ public class GameServlet extends HttpServlet {
       String tms = request.getParameter("tms");
       long endTimeMS = Long.parseLong(tms);
       LOGGER.debug("End time: " + endTimeMS);
-      Date startTime = (Date)context.getAttribute(START_TIME);
+      Date startTime = (Date) context.getAttribute(START_TIME);
       long startTimeMS = startTime.getTime();
       LOGGER.debug("Start time: " + startTimeMS);
       LOGGER.debug("Duration: " + (endTimeMS - startTimeMS));
       String playerId = request.getParameter("playerid"); // from hidden field
       LOGGER.debug("playerId=" + playerId + ": " + positionFrom + "," + positionTo);
-      
+
       /*
        * Chess objects
        */
@@ -132,62 +134,69 @@ public class GameServlet extends HttpServlet {
       if (players == null) {
         LOGGER.error("No players in session, creating new players map");
         // TODO Throw exception
-      } 
+      }
       Player player = players.get(playerId);
       LOGGER.debug("Logged on player (in session): " + player);
 
-//      Map<String, String> playerMovementPairs = null;
-//      ServletContext context = request.getSession().getServletContext();
-//      if (context.getAttribute("playerMovementPairs") == null) {
-//        LOGGER.debug("---> In POST: creating new playerMovementPairs");
-//        playerMovementPairs = new HashMap<String, String>();
-//      } else {
-//        LOGGER.debug("---> In POST: playerMovementPairs exists");
-//        playerMovementPairs = (Map<String, String>) context.getAttribute("playerMovementPairs");
-//      }
-//      if(playerMovementPairs != null) {
-//        playerMovementPairs.put(playerId, positionTo);    
-//        context.setAttribute("playerMovementPairs", playerMovementPairs);
-//      }
+      // Map<String, String> playerMovementPairs = null;
+      // ServletContext context = request.getSession().getServletContext();
+      // if (context.getAttribute("playerMovementPairs") == null) {
+      // LOGGER.debug("---> In POST: creating new playerMovementPairs");
+      // playerMovementPairs = new HashMap<String, String>();
+      // } else {
+      // LOGGER.debug("---> In POST: playerMovementPairs exists");
+      // playerMovementPairs = (Map<String, String>) context.getAttribute("playerMovementPairs");
+      // }
+      // if(playerMovementPairs != null) {
+      // playerMovementPairs.put(playerId, positionTo);
+      // context.setAttribute("playerMovementPairs", playerMovementPairs);
+      // }
 
-      if((helper.isTurnWhite() && player.isWhite()) 
-          || (!helper.isTurnWhite() && !player.isWhite())) {
-        LOGGER.debug("Current turn: " + (helper.isTurnWhite()? "WHITE" : "BLACK"));
-        
+      if ((helper.isTurnWhite() && player.isWhite()) || (!helper.isTurnWhite() && !player.isWhite())) {
+        LOGGER.debug("Current turn: " + (helper.isTurnWhite() ? "WHITE" : "BLACK"));
+
         // check if movement is valid before putting it in a map
-        if(helper.isMovementValid(locationFrom, locationTo)) { 
-          playerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS-startTimeMS, playerId));
+        if (helper.isMovementValid(locationFrom, locationTo)) {
+          playerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS - startTimeMS,
+              playerId));
         } else {
-          failedPlayerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS-startTimeMS, playerId));
+          failedPlayerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo,
+              endTimeMS - startTimeMS, playerId));
         }
-      } 
+      }
       LOGGER.debug("numberOfFalseMovements: " + failedPlayerMovementPairs.size());
 
-      // Check if all remaining (100 initially, but configurable), 
+      // Check if all remaining (100 initially, but configurable),
       // active users (requests) arrived before sending responses
-            
+
       int numberOfMovements = playerMovementPairs.size() + failedPlayerMovementPairs.size();
       // initial (configured) number of players, will be reduced as number of black players decreases
-      int numberOfActivePlayers = Integer.parseInt((String)context.getAttribute(INIT_PARAM_PLAYERS_NUM));      
+      // int numberOfActivePlayers = Integer.parseInt((String)context.getAttribute(INIT_PARAM_PLAYERS_NUM));
       LOGGER.debug("numberOfMovements: " + numberOfMovements);
       LOGGER.debug("numberOfActivePlayers: " + numberOfActivePlayers);
-      
+
       // if all players moved
-      if ((helper.isTurnWhite() && numberOfMovements == 1) 
+      if ((helper.isTurnWhite() && numberOfMovements == 1)
           || (!helper.isTurnWhite() && numberOfMovements == numberOfActivePlayers)) {
         /*
          * Determine both winning and losing movement
          */
-        //List<Movement> winningMovements = helper.findWinningMovements(playerMovementPairs);
+        // List<Movement> winningMovements = helper.findWinningMovements(playerMovementPairs);
         List<Movement> winningMovements = new ArrayList<Movement>();
         List<Movement> losingMovements = new ArrayList<Movement>();
         helper.findWinningMovements(winningMovements, losingMovements, playerMovementPairs, failedPlayerMovementPairs);
-        
+
         LOGGER.debug("Determined winning movements: " + winningMovements);
         LOGGER.debug("Determined losing movements: " + losingMovements);
-        
-        if(winningMovements.size() < 1) {
+
+        if (winningMovements.size() < 1) {
           // TODO: Exception
+        }
+
+        // initial (configured) number of black players is decreased
+        if (!helper.isTurnWhite()) {
+          numberOfActivePlayers = winningMovements.size();
+          LOGGER.debug("numberOfActivePlayers changed: " + numberOfActivePlayers);
         }
         
         // make JSON result
@@ -195,53 +204,52 @@ public class GameServlet extends HttpServlet {
         jsonResponse.put("movementFrom", winningMovements.get(0).getFrom().toString());
         jsonResponse.put("movementTo", winningMovements.get(0).getTo().toString());
         JSONArray winningList = new JSONArray();
-        for(Movement winningMovement : winningMovements) {
+        for (Movement winningMovement : winningMovements) {
           winningList.add(winningMovement.getPlayerId());
-        }       
+        }
         jsonResponse.put("winningPlayers", winningList);
         JSONArray losingList = new JSONArray();
-        for(Movement losingMovement : losingMovements) {
+        for (Movement losingMovement : losingMovements) {
           losingList.add(losingMovement.getPlayerId());
-        }       
+        }
         jsonResponse.put("losingPlayers", losingList);
         LOGGER.debug("JSON: " + jsonResponse.toJSONString());
-        
+
         /*
          * make movement on the board
          */
-//        ChessBoard newBoard = helper.getBoard().performMovement(winningMovement);
-//        try {
-//          LOGGER.debug("Piece on " + locationFrom + ": " + newBoard.getPieceOnLocation(locationFrom));
-//        } catch(PieceNotFoundException e) {
-//          LOGGER.debug("Piece on " + locationFrom + " not found on the board");
-//        }
-//        try {
-//          LOGGER.debug("Piece on " + locationTo + ": " + newBoard.getPieceOnLocation(locationTo));
-//        } catch(PieceNotFoundException e) {
-//          LOGGER.debug("Piece on " + locationTo + " not found on the board");
-//        }
-        
+        // ChessBoard newBoard = helper.getBoard().performMovement(winningMovement);
+        // try {
+        // LOGGER.debug("Piece on " + locationFrom + ": " + newBoard.getPieceOnLocation(locationFrom));
+        // } catch(PieceNotFoundException e) {
+        // LOGGER.debug("Piece on " + locationFrom + " not found on the board");
+        // }
+        // try {
+        // LOGGER.debug("Piece on " + locationTo + ": " + newBoard.getPieceOnLocation(locationTo));
+        // } catch(PieceNotFoundException e) {
+        // LOGGER.debug("Piece on " + locationTo + " not found on the board");
+        // }
         /*
          * send response to all players
          */
-        
+
         // get a safe local copy of the list of AsyncContext
         List<AsyncContext> asyncContexts = new ArrayList<AsyncContext>(this.contexts);
         // clear the common list to prevent a pending request to be notified twice
         this.contexts.clear();
 
         // process all given movements
-        //context = request.getSession().getServletContext();
-        //playerMovementPairs = (Map<String, String>) context.getAttribute("playerMovementPairs");
-        
+        // context = request.getSession().getServletContext();
+        // playerMovementPairs = (Map<String, String>) context.getAttribute("playerMovementPairs");
+
         // TODO: analyze all movements
-        //  1) maximum number of same field
-        //    1b) if 2 or more fields with the same number of movements, take least total movements time
+        // 1) maximum number of same field
+        // 1b) if 2 or more fields with the same number of movements, take least total movements time
         // TODO: write movements in database
-                
+
         try {
           LOGGER.debug(TURN_WHITE + ": " + helper.isTurnWhite());
-          
+
           helper.changeTurn(); // switch colour for the next turn
           playerMovementPairs.clear(); // clear list of performed movements
           context.setAttribute(START_TIME, new Date()); // reset start time
@@ -249,7 +257,7 @@ public class GameServlet extends HttpServlet {
           // TODO FATAL system error (check code) - exit the game
           LOGGER.error("Object " + e.getMessage() + " not found in context");
         }
-        
+
         /*
          * For all the AsyncContexts queued write the message to their responses
          */
@@ -266,6 +274,6 @@ public class GameServlet extends HttpServlet {
           }
         }
       }
-    }    
-  }  
+    }
+  }
 }
