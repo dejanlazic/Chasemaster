@@ -154,26 +154,25 @@ public class GameServlet extends HttpServlet {
       // context.setAttribute("playerMovementPairs", playerMovementPairs);
       // }
 
+      LOGGER.debug("Before filling movements lists: playerMovementPairs.size: " + playerMovementPairs.size() + ", failedPlayerMovementPairs.size: " + failedPlayerMovementPairs.size());
       if ((helper.isTurnWhite() && player.isWhite()) || (!helper.isTurnWhite() && !player.isWhite())) {
-        LOGGER.debug("Current turn: " + (helper.isTurnWhite() ? "WHITE" : "BLACK"));
-
         // check if movement is valid before putting it in a map
         if (helper.isMovementValid(locationFrom, locationTo)) {
-          playerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS - startTimeMS,
-              playerId));
+          playerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS - startTimeMS, playerId));
         } else {
-          failedPlayerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo,
-              endTimeMS - startTimeMS, playerId));
+          failedPlayerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS - startTimeMS, playerId));
         }
       }
-      LOGGER.debug("numberOfFalseMovements: " + failedPlayerMovementPairs.size());
-
       // Check if all remaining (100 initially, but configurable),
       // active users (requests) arrived before sending responses
 
       int numberOfMovements = playerMovementPairs.size() + failedPlayerMovementPairs.size();
       LOGGER.debug("numberOfMovements: " + numberOfMovements);
+      LOGGER.debug("numberOfMovements - correct: " + playerMovementPairs.size());
+      LOGGER.debug("numberOfMovements - false: " + failedPlayerMovementPairs.size());
       LOGGER.debug("numberOfActivePlayers: " + numberOfActivePlayers);
+      LOGGER.debug("Current turn: " + (helper.isTurnWhite() ? "WHITE" : "BLACK"));
+
 
       // if all players moved
       if ((helper.isTurnWhite() && numberOfMovements == 1)
@@ -258,10 +257,10 @@ public class GameServlet extends HttpServlet {
         // TODO: write movements in database
 
         try {
-          LOGGER.debug(TURN_WHITE + ": " + helper.isTurnWhite());
-
           helper.changeTurn(); // switch colour for the next turn
-          playerMovementPairs.clear(); // clear list of performed movements
+          playerMovementPairs.clear(); // clear lists of performed movements
+          failedPlayerMovementPairs.clear();
+          LOGGER.debug("After cleaning movements lists: playerMovementPairs.size: " + playerMovementPairs.size() + ", failedPlayerMovementPairs.size: " + failedPlayerMovementPairs.size());
           context.setAttribute(START_TIME, new Date()); // reset start time
         } catch (NoObjectInContextException e) {
           // TODO FATAL system error (check code) - exit the game

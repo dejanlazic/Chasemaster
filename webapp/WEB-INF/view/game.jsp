@@ -194,6 +194,8 @@
 
                         // move icon on the board
                         var _img = document.getElementById(movementFrom);
+                        //alert(_img.id);
+                        //alert(_img.style['background-image']);
                         
                         return false;
                     }
