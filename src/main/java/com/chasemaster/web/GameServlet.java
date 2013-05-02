@@ -24,7 +24,6 @@ import com.chasemaster.exception.NoMovementException;
 import com.chasemaster.exception.NoObjectInContextException;
 import com.chasemaster.persistence.model.Player;
 import com.chasemaster.util.GameHelper;
-import com.mgs.chess.core.ChessBoard;
 import com.mgs.chess.core.Location;
 import com.mgs.chess.core.Piece;
 import com.mgs.chess.core.PieceNotFoundException;

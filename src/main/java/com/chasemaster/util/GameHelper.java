@@ -137,7 +137,7 @@ public class GameHelper {
       losingMovements.add(entry.getValue());
     }
 
-    LOGGER.debug("--------> HERE: " + playerMovementPairs.size() + ", " + failedPlayerMovementPairs.size());
+    LOGGER.debug("--------> Retrieved (correctMovements, failedMovements): " + playerMovementPairs.size() + ", " + failedPlayerMovementPairs.size());
 
     /*
      * Converts player-movement map to list of movements grouped by FROM-TO fields combination.
@@ -183,7 +183,6 @@ public class GameHelper {
       }
     }
 
-    // TODO Handle exception?
     // no winning movements (all coming are failed) - other side wins
     if (fromtoFields == null) {
       LOGGER.debug("None from-to field determined");
@@ -213,6 +212,7 @@ public class GameHelper {
           totalDurationPerGroup += tempWinningMovement.getDuration();
         }
 
+        // if current total time better than previous, current movements are temporarily winning
         if (totalDurationPerGroup < totalDuration) {
           // move current list into losing movements
           for (Movement winningMovement : winningMovements) {
@@ -220,13 +220,18 @@ public class GameHelper {
           }
 
           // make new winning list
-          LOGGER.debug("How many win mov to add: " + tempWinningMovements.size());
           winningMovements.clear();
           for (Movement tempWinningMovement : tempWinningMovements) {
             winningMovements.add(tempWinningMovement);
           }
 
+          // set total time to currently best one
           totalDuration = totalDurationPerGroup;
+          // otherwise current movements are losing ones
+        } else {
+          for (Movement tempWinningMovement : tempWinningMovements) {
+            losingMovements.add(tempWinningMovement);
+          }          
         }
         LOGGER.debug("Chosen winning fields combination: " + winningMovements.get(0).getFrom() + winningMovements.get(0).getTo());
       }
