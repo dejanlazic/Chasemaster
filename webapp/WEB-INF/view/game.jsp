@@ -11,6 +11,7 @@
 	</head>
 
 	<body>
+      <div id="game">
       <table>
 	      <tr>
 		      <td>		   
@@ -127,7 +128,7 @@
             </td>
           </tr>
       </table>
-
+      </div>
 
       <script>
         <!--
@@ -136,10 +137,12 @@
         
         // AJAX call to register async communication in servlet, and wait until a message is posted  
 
-        var messagesWaiting = false;  
+        var messagesWaiting = false;
+        var outOfGame = false;  
+        var gameOver = false;
               
         function getMessages() {
-            if(!messagesWaiting) {
+            if(!messagesWaiting && !outOfGame) {
                 messagesWaiting = true;
                 
                 var xmlRequest = new XMLHttpRequest();
@@ -154,6 +157,7 @@
                         var data = eval('(' + xmlRequest.responseText + ')');                        
                         var movementFrom = data.movementFrom;
                         var movementTo = data.movementTo;
+                        gameOver = data.gameOver;
 
                         var content = '<b>From:</b>' + movementFrom + '<br/>';                                   
                         content += '<b>To  :</b>' + movementTo;
@@ -184,11 +188,13 @@
                           content += '<td>' + losingPlayers[j] + '</td></tr>';
 
                           if(losingPlayers[j] == document.getElementById("playerid").value) {
-                            document.getElementById("board").style.display = 'none';
-                            document.getElementById("boardLetters").style.display = 'none';
+                            document.getElementById("game").style.display = 'none';
+                            outOfGame = true;
+                            deInit();
                           } 
                         }
                         content += '</tbody></table>';
+                        content += '<br/>Game over? ' + data.gameOver;
                         
                         document.getElementById("message").innerHTML = content;
 

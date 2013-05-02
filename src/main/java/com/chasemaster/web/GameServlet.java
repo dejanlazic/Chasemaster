@@ -20,6 +20,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import com.chasemaster.exception.NoMovementException;
 import com.chasemaster.exception.NoObjectInContextException;
 import com.chasemaster.persistence.model.Player;
 import com.chasemaster.util.GameHelper;
@@ -46,7 +47,8 @@ public class GameServlet extends HttpServlet {
   private Map<String, Movement> playerMovementPairs = new HashMap<String, Movement>();
   private Map<String, Movement> failedPlayerMovementPairs = new HashMap<String, Movement>();
   private GameHelper helper;
-  int numberOfActivePlayers = 0;
+  private int numberOfActivePlayers = 0;
+  private boolean gameOver = false;
 
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
@@ -84,7 +86,7 @@ public class GameServlet extends HttpServlet {
       contexts.add(asyncContext);
 
       LOGGER.debug("====================");
-      LOGGER.debug("playerid: " + request.getParameter("playerid"));
+      LOGGER.debug("playerid registered to asyncContext: " + request.getParameter("playerid"));
     }
   }
 
@@ -99,7 +101,7 @@ public class GameServlet extends HttpServlet {
       // get current or create new session object
       session = request.getSession(true);
       LOGGER.debug("====================");
-      LOGGER.debug("Contexts size: " + this.contexts.size());
+      LOGGER.debug("Async contexts size: " + contexts.size());
 
       /*
        * Input parameters
@@ -154,7 +156,8 @@ public class GameServlet extends HttpServlet {
       // context.setAttribute("playerMovementPairs", playerMovementPairs);
       // }
 
-      LOGGER.debug("Before filling movements lists: playerMovementPairs.size: " + playerMovementPairs.size() + ", failedPlayerMovementPairs.size: " + failedPlayerMovementPairs.size());
+      LOGGER.debug("Before filling movements lists: playerMovementPairs.size: " + playerMovementPairs.size() + ", failedPlayerMovementPairs.size: "
+          + failedPlayerMovementPairs.size());
       if ((helper.isTurnWhite() && player.isWhite()) || (!helper.isTurnWhite() && !player.isWhite())) {
         // check if movement is valid before putting it in a map
         if (helper.isMovementValid(locationFrom, locationTo)) {
@@ -167,30 +170,30 @@ public class GameServlet extends HttpServlet {
       // active users (requests) arrived before sending responses
 
       int numberOfMovements = playerMovementPairs.size() + failedPlayerMovementPairs.size();
-      LOGGER.debug("numberOfMovements: " + numberOfMovements);
+      LOGGER.debug("numberOfMovements - total: " + numberOfMovements);
       LOGGER.debug("numberOfMovements - correct: " + playerMovementPairs.size());
       LOGGER.debug("numberOfMovements - false: " + failedPlayerMovementPairs.size());
       LOGGER.debug("numberOfActivePlayers: " + numberOfActivePlayers);
       LOGGER.debug("Current turn: " + (helper.isTurnWhite() ? "WHITE" : "BLACK"));
 
-
       // if all players moved
-      if ((helper.isTurnWhite() && numberOfMovements == 1)
-          || (!helper.isTurnWhite() && numberOfMovements == numberOfActivePlayers)) {
+      if ((helper.isTurnWhite() && numberOfMovements == 1) || (!helper.isTurnWhite() && numberOfMovements == numberOfActivePlayers)) {
         /*
          * Determine both winning and losing movement
          */
         // List<Movement> winningMovements = helper.findWinningMovements(playerMovementPairs);
         List<Movement> winningMovements = new ArrayList<Movement>();
         List<Movement> losingMovements = new ArrayList<Movement>();
-        helper.findWinningMovements(winningMovements, losingMovements, playerMovementPairs, failedPlayerMovementPairs);
+        try {
+          helper.findWinningMovements(winningMovements, losingMovements, playerMovementPairs, failedPlayerMovementPairs);
+        } catch (NoMovementException e1) {
+          // TODO: Finish
+          LOGGER.debug("GAME OVER; winner color: " + helper.isTurnWhite());
+          gameOver = true;
+        }
 
         LOGGER.debug("Determined winning movements: " + winningMovements);
         LOGGER.debug("Determined losing movements: " + losingMovements);
-
-        if (winningMovements.size() < 1) {
-          // TODO: Exception
-        }
 
         // decrease initial (configured) number of black players
         if (!helper.isTurnWhite()) {
@@ -202,40 +205,43 @@ public class GameServlet extends HttpServlet {
          * check if end of game
          */
         // TODO: Implement
-        
-        /*
-         * make movement on the board
-         */
-        Movement winMovement = winningMovements.get(0);
-        LOGGER.debug("Perform movement on board: " + winMovement);
-        ChessBoard newBoard = helper.getBoard().performMovement(winMovement);
+
+        JSONObject jsonResponse = new JSONObject();
+        if (winningMovements.size() > 0) {
+          /*
+           * make movement on the board
+           */
+          Movement winMovement = winningMovements.get(0);
+          LOGGER.debug("Perform movement on board: " + winMovement);
+          helper.getBoard().performMovement(winMovement);
+          
+          /*
+           * make JSON result
+           */
+          jsonResponse.put("movementFrom", winningMovements.get(0).getFrom().toString());
+          jsonResponse.put("movementTo", winningMovements.get(0).getTo().toString());
+          JSONArray winningList = new JSONArray();
+          for (Movement winningMovement : winningMovements) {
+            winningList.add(winningMovement.getPlayerId());
+          }
+          jsonResponse.put("winningPlayers", winningList);
+          JSONArray losingList = new JSONArray();
+          for (Movement losingMovement : losingMovements) {
+            losingList.add(losingMovement.getPlayerId());
+          }
+          jsonResponse.put("losingPlayers", losingList);
+          jsonResponse.put("gameOver", gameOver);
+        }
         try {
-          LOGGER.debug("Piece on " + locationFrom + ": " + newBoard.getPieceOnLocation(locationFrom));
+          LOGGER.debug("Piece on " + locationFrom + ": " + helper.getBoard().getPieceOnLocation(locationFrom));
         } catch (PieceNotFoundException e) {
           LOGGER.debug("Piece on " + locationFrom + " not found on the board");
         }
         try {
-          LOGGER.debug("Piece on " + locationTo + ": " + newBoard.getPieceOnLocation(locationTo));
+          LOGGER.debug("Piece on " + locationTo + ": " + helper.getBoard().getPieceOnLocation(locationTo));
         } catch (PieceNotFoundException e) {
           LOGGER.debug("Piece on " + locationTo + " not found on the board");
         }
-
-        /*
-         * make JSON result
-         */
-        JSONObject jsonResponse = new JSONObject();
-        jsonResponse.put("movementFrom", winningMovements.get(0).getFrom().toString());
-        jsonResponse.put("movementTo", winningMovements.get(0).getTo().toString());
-        JSONArray winningList = new JSONArray();
-        for (Movement winningMovement : winningMovements) {
-          winningList.add(winningMovement.getPlayerId());
-        }
-        jsonResponse.put("winningPlayers", winningList);
-        JSONArray losingList = new JSONArray();
-        for (Movement losingMovement : losingMovements) {
-          losingList.add(losingMovement.getPlayerId());
-        }
-        jsonResponse.put("losingPlayers", losingList);
         LOGGER.debug("JSON: " + jsonResponse.toJSONString());
 
         /*
@@ -243,9 +249,9 @@ public class GameServlet extends HttpServlet {
          */
 
         // get a safe local copy of the list of AsyncContext
-        List<AsyncContext> asyncContexts = new ArrayList<AsyncContext>(this.contexts);
+        List<AsyncContext> asyncContexts = new ArrayList<AsyncContext>(contexts);
         // clear the common list to prevent a pending request to be notified twice
-        this.contexts.clear();
+        contexts.clear();
 
         // process all given movements
         // context = request.getSession().getServletContext();
@@ -260,7 +266,6 @@ public class GameServlet extends HttpServlet {
           helper.changeTurn(); // switch colour for the next turn
           playerMovementPairs.clear(); // clear lists of performed movements
           failedPlayerMovementPairs.clear();
-          LOGGER.debug("After cleaning movements lists: playerMovementPairs.size: " + playerMovementPairs.size() + ", failedPlayerMovementPairs.size: " + failedPlayerMovementPairs.size());
           context.setAttribute(START_TIME, new Date()); // reset start time
         } catch (NoObjectInContextException e) {
           // TODO FATAL system error (check code) - exit the game

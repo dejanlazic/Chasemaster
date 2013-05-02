@@ -189,3 +189,10 @@ function clearPositions() {
   positionTo = null;
   moved = false;
 }
+
+function deInit() {
+  alert('Out of game ' + _hiddenPlayerId.value);
+  
+  document.onmousedown = null;
+  document.onmouseup = null;
+}
