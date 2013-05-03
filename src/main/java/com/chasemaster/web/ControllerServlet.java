@@ -83,7 +83,6 @@ public class ControllerServlet extends HttpServlet implements PageConst {
 
     helper = new GameHelper(context);
 
-    context.setAttribute(CHESSBOARD, helper.prepareBoard());
     context.setAttribute(CHESSBOARD_IMAGES, helper.getBoardImages());
   }
 

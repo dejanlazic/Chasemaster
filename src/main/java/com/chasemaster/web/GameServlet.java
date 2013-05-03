@@ -180,7 +180,6 @@ public class GameServlet extends HttpServlet {
         /*
          * Determine both winning and losing movement
          */
-        // List<Movement> winningMovements = helper.findWinningMovements(playerMovementPairs);
         List<Movement> winningMovements = new ArrayList<Movement>();
         List<Movement> losingMovements = new ArrayList<Movement>();
         try {
@@ -212,8 +211,19 @@ public class GameServlet extends HttpServlet {
            */
           Movement winMovement = winningMovements.get(0);
           LOGGER.debug("Perform movement on board: " + winMovement);
-          helper.getBoard().performMovement(winMovement);
+          helper.performMovement(winMovement);
           
+          try {
+            LOGGER.debug("Piece on " + locationFrom + ": " + helper.getBoard().getPieceOnLocation(locationFrom));
+          } catch (PieceNotFoundException e) {
+            LOGGER.debug("Piece on " + locationFrom + " not found on the board");
+          }
+          try {
+            LOGGER.debug("Piece on " + locationTo + ": " + helper.getBoard().getPieceOnLocation(locationTo));
+          } catch (PieceNotFoundException e) {
+            LOGGER.debug("Piece on " + locationTo + " not found on the board");
+          }
+
           /*
            * make JSON result
            */
@@ -224,25 +234,23 @@ public class GameServlet extends HttpServlet {
             winningList.add(winningMovement.getPlayerId());
           }
           jsonResponse.put("winningPlayers", winningList);
+        } else {
+          jsonResponse.put("movementFrom", "");
+          jsonResponse.put("movementTo", "");
+          jsonResponse.put("winningPlayers", new JSONArray());
+        }
+        if (losingMovements.size() > 0) {
           JSONArray losingList = new JSONArray();
           for (Movement losingMovement : losingMovements) {
             losingList.add(losingMovement.getPlayerId());
           }
           jsonResponse.put("losingPlayers", losingList);
-          jsonResponse.put("gameOver", gameOver);
+        } else {
+          jsonResponse.put("losingPlayers", new JSONArray());
         }
-        try {
-          LOGGER.debug("Piece on " + locationFrom + ": " + helper.getBoard().getPieceOnLocation(locationFrom));
-        } catch (PieceNotFoundException e) {
-          LOGGER.debug("Piece on " + locationFrom + " not found on the board");
-        }
-        try {
-          LOGGER.debug("Piece on " + locationTo + ": " + helper.getBoard().getPieceOnLocation(locationTo));
-        } catch (PieceNotFoundException e) {
-          LOGGER.debug("Piece on " + locationTo + " not found on the board");
-        }
+        jsonResponse.put("gameOver", gameOver);
         LOGGER.debug("JSON: " + jsonResponse.toJSONString());
-
+        
         /*
          * send response to all players
          */

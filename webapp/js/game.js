@@ -191,7 +191,7 @@ function clearPositions() {
 }
 
 function deInit() {
-  alert('Out of game ' + _hiddenPlayerId.value);
+  alert('Out of game (player id: ' + _hiddenPlayerId.value + ')');
   
   document.onmousedown = null;
   document.onmouseup = null;

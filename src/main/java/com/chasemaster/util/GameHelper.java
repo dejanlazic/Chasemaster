@@ -30,7 +30,7 @@ public class GameHelper {
   private ChessReader chessReader;
   private ChessAnaliserImpl chessAnaliser;
 
-  public GameHelper() {
+  private GameHelper() {
     super();
 
     chessReader = new ChessReaderImpl();
@@ -40,25 +40,11 @@ public class GameHelper {
   public GameHelper(ServletContext context) {
     this();
     this.context = context;
+    
+    prepareBoard();
   }
 
-  public void changeTurn() {
-    Boolean turn = (Boolean) context.getAttribute(TURN_WHITE);
-    if (turn == null) {
-      throw new NoObjectInContextException(TURN_WHITE);
-    }
-    context.setAttribute(TURN_WHITE, !turn);
-  }
-
-  public Boolean isTurnWhite() {
-    Boolean turn = (Boolean) context.getAttribute(TURN_WHITE);
-    if (turn == null) {
-      throw new NoObjectInContextException(TURN_WHITE);
-    }
-    return turn;
-  }
-
-  public ChessBoard prepareBoard() {
+  public void prepareBoard() {
     ChessBoard board = new ChessBoard().addPiece(Piece.WHITE_ROOK, Location.A1).addPiece(Piece.WHITE_KNIGHT, Location.B1).addPiece(
         Piece.WHITE_BISHOP, Location.C1).addPiece(Piece.WHITE_KING, Location.D1).addPiece(Piece.WHITE_QUEEN, Location.E1).addPiece(
         Piece.WHITE_BISHOP, Location.F1).addPiece(Piece.WHITE_KNIGHT, Location.G1).addPiece(Piece.WHITE_ROOK, Location.H1).addPiece(Piece.WHITE_PAWN,
@@ -71,7 +57,7 @@ public class GameHelper {
             Piece.BLACK_QUEEN, Location.E8).addPiece(Piece.BLACK_BISHOP, Location.F8).addPiece(Piece.BLACK_KNIGHT, Location.G8).addPiece(
             Piece.BLACK_ROOK, Location.H8);
 
-    return board;
+    context.setAttribute(CHESSBOARD, board);
   }
 
   public ChessBoard getBoard() {
@@ -82,6 +68,11 @@ public class GameHelper {
     return getBoard().getPieceOnLocation(location).getPiece();
   }
 
+  public void performMovement(Movement movement) {
+    ChessBoard board = getBoard().performMovement(movement.getMovingPiece(), movement.getFrom(), movement.getTo());
+    context.setAttribute(CHESSBOARD, board);
+  }
+  
   /*
    * Takes all pieces on the board and populates a map with their images
    */
@@ -104,6 +95,22 @@ public class GameHelper {
     }
 
     return boardImages;
+  }
+
+  public void changeTurn() {
+    Boolean turn = (Boolean) context.getAttribute(TURN_WHITE);
+    if (turn == null) {
+      throw new NoObjectInContextException(TURN_WHITE);
+    }
+    context.setAttribute(TURN_WHITE, !turn);
+  }
+
+  public Boolean isTurnWhite() {
+    Boolean turn = (Boolean) context.getAttribute(TURN_WHITE);
+    if (turn == null) {
+      throw new NoObjectInContextException(TURN_WHITE);
+    }
+    return turn;
   }
 
   public boolean isMovementValid(Location locationFrom, Location locationTo) {

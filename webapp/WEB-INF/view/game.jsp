@@ -199,9 +199,10 @@
                         document.getElementById("message").innerHTML = content;
 
                         // move icon on the board
-                        var _img = document.getElementById(movementFrom);
-                        //alert(_img.id);
-                        //alert(_img.style['background-image']);
+                        var _imgFrom = document.getElementById(movementFrom).style.backgroundImage;                        
+                        //alert(_imgFrom);
+                        document.getElementById(movementTo).style.backgroundImage = _imgFrom;
+                        document.getElementById(movementFrom).style.backgroundImage = null;
                         
                         return false;
                     }
