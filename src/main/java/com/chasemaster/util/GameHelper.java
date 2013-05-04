@@ -136,8 +136,8 @@ public class GameHelper {
           + locationTo.getCoordinateX() + "," + locationTo.getCoordinateY() + ")");
       try {
         PieceOnLocation pieceTo = board.getPieceOnLocation(locationTo);
-        // not allowed to move if it has a piece in front of it
-        if(pieceTo != null) {
+        // not allowed to move if it has a piece of any colour in front of it
+        if (pieceTo != null) {
           LOGGER.debug("PAWN blocked on field: " + locationTo);
           return false;
         }
@@ -155,6 +155,20 @@ public class GameHelper {
     }
 
     return false;
+  }
+
+  public boolean isInChess() {
+    if (isTurnWhite())
+      return chessAnaliser.isInCheck(getBoard(), Color.BLACK);
+    else
+      return chessAnaliser.isInCheck(getBoard(), Color.WHITE);
+  }
+
+  public boolean isCheckMate() {
+    if (isTurnWhite())
+      return chessAnaliser.isCheckMate(getBoard(), Color.BLACK);
+    else
+      return chessAnaliser.isCheckMate(getBoard(), Color.WHITE);
   }
 
   /*

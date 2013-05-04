@@ -24,6 +24,7 @@ import com.chasemaster.exception.NoMovementException;
 import com.chasemaster.exception.NoObjectInContextException;
 import com.chasemaster.persistence.model.Player;
 import com.chasemaster.util.GameHelper;
+import com.mgs.chess.core.Color;
 import com.mgs.chess.core.Location;
 import com.mgs.chess.core.Piece;
 import com.mgs.chess.core.PieceNotFoundException;
@@ -199,13 +200,8 @@ public class GameServlet extends HttpServlet {
           LOGGER.debug("numberOfActivePlayers changed: " + numberOfActivePlayers);
         }
 
-        /*
-         * check if end of game
-         */
-        // TODO: Implement
-        
-        
         JSONObject jsonResponse = new JSONObject();
+
         if (winningMovements.size() > 0) {
           // check if targeted field is empty
           try {
@@ -246,6 +242,16 @@ public class GameServlet extends HttpServlet {
           } catch (PieceNotFoundException e) {
             LOGGER.debug("Piece on TO(" + locationTo + ") not found on the board");
           }
+
+          /*
+           * check if end of game
+           */
+          if(helper.isInChess()) {
+            LOGGER.debug((helper.isTurnWhite() ? "BLACK" : "WHITE") + " is in chess");
+          }
+          if(helper.isInChess() && helper.isCheckMate()) {
+            LOGGER.debug((helper.isTurnWhite() ? "BLACK" : "WHITE") + " is in check mate");            
+          }          
 
           /*
            * make JSON result

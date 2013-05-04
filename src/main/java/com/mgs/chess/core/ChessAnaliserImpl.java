@@ -70,19 +70,16 @@ public class ChessAnaliserImpl implements ChessAnaliser {
   }
 
   @Override
-  public List<Location> findReachableLocations(PieceOnLocation pieceOnLocation, ChessBoard board,
-      Movement previousMovement) {
+  public List<Location> findReachableLocations(PieceOnLocation pieceOnLocation, ChessBoard board, Movement previousMovement) {
     Piece piece = pieceOnLocation.getPiece();
     List<Location> toReturn = new ArrayList<Location>();
 
     // TODO: Check PAWN when has opposite colour in front - shouldn't be able to move
     for (MovementLine movementLine : chessReader.findMovementLines(pieceOnLocation)) {
       if (movementLine.isApplicable(board, previousMovement)) {
-        List<Location> potentiallyReachablePositions = movementLine.filterPotentiallyReachablePositions(
-            pieceOnLocation.getColor(), board);
+        List<Location> potentiallyReachablePositions = movementLine.filterPotentiallyReachablePositions(pieceOnLocation.getColor(), board);
         for (Location location : potentiallyReachablePositions) {
-          ChessBoard nextPossibleBoard = nextBoard(board, movementLine.getType(), pieceOnLocation, location,
-              previousMovement);
+          ChessBoard nextPossibleBoard = nextBoard(board, movementLine.getType(), pieceOnLocation, location, previousMovement);
           if (!isInCheck(nextPossibleBoard, piece.getColor())) {
             toReturn.add(location);
           }
@@ -93,8 +90,7 @@ public class ChessAnaliserImpl implements ChessAnaliser {
     return toReturn;
   }
 
-  ChessBoard nextBoard(ChessBoard board, MovementType movementType, PieceOnLocation pieceOnLocation, Location location,
-      Movement previousMovement) {
+  ChessBoard nextBoard(ChessBoard board, MovementType movementType, PieceOnLocation pieceOnLocation, Location location, Movement previousMovement) {
     ChessBoard newBoard = board.performMovement(pieceOnLocation, location);
     if ((movementType != ConditionalMovementType.DIAGONAL_LEFT_FORWARD_ON_EN_PASSANT)
         && (movementType != ConditionalMovementType.DIAGONAL_RIGHT_FORWARD_ON_EN_PASSANT)) {
@@ -104,20 +100,30 @@ public class ChessAnaliserImpl implements ChessAnaliser {
     }
   }
 
+  /*
+   * Do not use - incorrect implementation
+   */
   public boolean isCheckMate(ChessBoard chessBoard) {
-    System.out.println("In isCheckMate: ");
-
     PieceOnLocation blackKing = chessBoard.find(Piece.BLACK_KING).get(0);
     PieceOnLocation whiteKing = chessBoard.find(Piece.WHITE_KING).get(0);
-    
-    System.out.println(blackKing + ", " + whiteKing);
-    
+
     List<Location> blackKingReachablePositions = findReachableLocations(chessBoard.getPieceOnLocation(blackKing.getLocation()), chessBoard, null);
     List<Location> whiteKingReachablePositions = findReachableLocations(chessBoard.getPieceOnLocation(whiteKing.getLocation()), chessBoard, null);
-    
-    System.out.println(blackKingReachablePositions.size() + ", " + whiteKingReachablePositions.size());
-    
-    // if either WHITE or BLACK king cannot move, it is check mate 
-    return blackKingReachablePositions.size()==0 || whiteKingReachablePositions.size()==0;
+
+    // if either WHITE or BLACK king cannot move, it is check mate
+    // this is not good implementation - should be checked only for one colour
+    return blackKingReachablePositions.size() == 0 || whiteKingReachablePositions.size() == 0;
+  }
+
+  public boolean isCheckMate(ChessBoard chessBoard, Color color) {
+    PieceOnLocation king = null;
+    if (color.equals(Color.BLACK))
+      king = chessBoard.find(Piece.BLACK_KING).get(0);
+    else if (color.equals(Color.WHITE))
+      king = chessBoard.find(Piece.WHITE_KING).get(0);
+
+    List<Location> kingReachablePositions = findReachableLocations(chessBoard.getPieceOnLocation(king.getLocation()), chessBoard, null);
+
+    return kingReachablePositions.size() == 0;
   }
 }
