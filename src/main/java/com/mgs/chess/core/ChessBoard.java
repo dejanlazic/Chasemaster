@@ -20,6 +20,7 @@ public class ChessBoard {
     Squares copy = squares.copy();
     copy.setContent(SquareContent.EMPTY_SQUARE, locationFrom.getCoordinateX(), locationFrom.getCoordinateY());
     copy.setContent(piece, locationTo.getCoordinateX(), locationTo.getCoordinateY());
+    
     return new ChessBoard(copy);
   }
 
@@ -38,6 +39,7 @@ public class ChessBoard {
   public ChessBoard addPiece(Piece piece, Location location) {
     Squares copy = squares.copy();
     copy.setContent(piece, location.getCoordinateX(), location.getCoordinateY());
+    
     return new ChessBoard(copy);
   }
 
@@ -51,6 +53,7 @@ public class ChessBoard {
           pieces.add(piece.on(location));
       }
     }
+    
     return pieces;
   }
 
@@ -64,6 +67,7 @@ public class ChessBoard {
           pieces.add(piece.on(location));
       }
     }
+    
     return pieces;
   }
 
@@ -78,6 +82,7 @@ public class ChessBoard {
   public ChessBoard empty(Location location) {
     Squares copy = squares.copy();
     copy.setContent(SquareContent.EMPTY_SQUARE, location.getCoordinateX(), location.getCoordinateY());
+    
     return new ChessBoard(copy);
   }
 }

@@ -72,5 +72,5 @@ public enum PieceType {
 
 	public List<MovementType> getMovementTypes() {
 		return availableMovementTypes;
-	}
+	}	
 }

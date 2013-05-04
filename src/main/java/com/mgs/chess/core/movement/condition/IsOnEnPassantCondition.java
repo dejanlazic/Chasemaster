@@ -7,7 +7,6 @@ import com.mgs.chess.core.PieceType;
 import com.mgs.chess.core.movement.Movement;
 
 public class IsOnEnPassantCondition implements Condition {
-
 	@Override
 	public boolean isApplicable(PieceOnLocation pieceOnLocation, Location locationTo, ChessBoard board, Movement previousMovement) {
 		if (previousMovement == null) return false;
@@ -19,5 +18,4 @@ public class IsOnEnPassantCondition implements Condition {
 		
 		return false;
 	}
-
 }

@@ -20,7 +20,9 @@ import com.mgs.chess.core.ChessReaderImpl;
 import com.mgs.chess.core.Color;
 import com.mgs.chess.core.Location;
 import com.mgs.chess.core.Piece;
+import com.mgs.chess.core.PieceNotFoundException;
 import com.mgs.chess.core.PieceOnLocation;
+import com.mgs.chess.core.PieceType;
 import com.mgs.chess.core.movement.Movement;
 
 public class GameHelper {
@@ -40,7 +42,7 @@ public class GameHelper {
   public GameHelper(ServletContext context) {
     this();
     this.context = context;
-    
+
     prepareBoard();
   }
 
@@ -67,7 +69,7 @@ public class GameHelper {
   private void setBoard(ChessBoard board) {
     context.setAttribute(CHESSBOARD, board);
   }
-  
+
   public Piece getPiece(Location location) {
     return getBoard().getPieceOnLocation(location).getPiece();
   }
@@ -81,7 +83,7 @@ public class GameHelper {
     ChessBoard board = getBoard().performMovement(movement.getMovingPiece(), movement.getFrom(), movement.getTo());
     setBoard(board);
   }
-  
+
   /*
    * Takes all pieces on the board and populates a map with their images
    */
@@ -123,9 +125,25 @@ public class GameHelper {
   }
 
   public boolean isMovementValid(Location locationFrom, Location locationTo) {
+    LOGGER.debug("Reachable locations for " + getBoard().getPieceOnLocation(locationFrom) + ": ");
+
     ChessBoard board = getBoard();
 
-    LOGGER.debug("found reachable locations for location " + locationFrom + ": " + board.getPieceOnLocation(locationFrom));
+    // not implemented functionality for PAWN in MGS -
+    PieceOnLocation pieceFrom = board.getPieceOnLocation(locationFrom);
+    if (pieceFrom.getType().equals(PieceType.PAWN) && locationFrom.getCoordinateX() == locationTo.getCoordinateX()) {
+      LOGGER.debug("-> Piece is PAWN; movement FROM(" + locationFrom.getCoordinateX() + "," + locationFrom.getCoordinateY() + ") TO("
+          + locationTo.getCoordinateX() + "," + locationTo.getCoordinateY() + ")");
+      try {
+        PieceOnLocation pieceTo = board.getPieceOnLocation(locationTo);
+        // not allowed to move if it has a piece in front of it
+        if(pieceTo != null) {
+          LOGGER.debug("PAWN blocked on field: " + locationTo);
+          return false;
+        }
+      } catch (PieceNotFoundException e) {
+      }
+    }
 
     List<Location> reachablePositions = chessAnaliser.findReachableLocations(board.getPieceOnLocation(locationFrom), board, null);
     for (Location reachablePosition : reachablePositions) {
@@ -247,7 +265,7 @@ public class GameHelper {
         } else {
           for (Movement tempWinningMovement : tempWinningMovements) {
             losingMovements.add(tempWinningMovement);
-          }          
+          }
         }
         LOGGER.debug("Chosen winning fields combination: " + winningMovements.get(0).getFrom() + winningMovements.get(0).getTo());
       }

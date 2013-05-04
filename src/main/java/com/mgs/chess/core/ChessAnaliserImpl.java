@@ -75,6 +75,7 @@ public class ChessAnaliserImpl implements ChessAnaliser {
     Piece piece = pieceOnLocation.getPiece();
     List<Location> toReturn = new ArrayList<Location>();
 
+    // TODO: Check PAWN when has opposite colour in front - shouldn't be able to move
     for (MovementLine movementLine : chessReader.findMovementLines(pieceOnLocation)) {
       if (movementLine.isApplicable(board, previousMovement)) {
         List<Location> potentiallyReachablePositions = movementLine.filterPotentiallyReachablePositions(

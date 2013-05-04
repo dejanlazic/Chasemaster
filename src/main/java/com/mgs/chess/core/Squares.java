@@ -44,5 +44,4 @@ public class Squares{
 	public SquareContent getContent(int coordinateX, int coordinateY) {
 		return values[coordinateX-1][coordinateY-1];
 	}
-
 }

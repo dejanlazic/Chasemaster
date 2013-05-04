@@ -154,10 +154,12 @@ public class GameServlet extends HttpServlet {
       // context.setAttribute("playerMovementPairs", playerMovementPairs);
       // }
 
+      /*
+       * check if movement is valid before putting it in a map
+       */
       LOGGER.debug("Before filling movements lists: playerMovementPairs.size: " + playerMovementPairs.size() + ", failedPlayerMovementPairs.size: "
           + failedPlayerMovementPairs.size());
       if ((helper.isTurnWhite() && player.isWhite()) || (!helper.isTurnWhite() && !player.isWhite())) {
-        // check if movement is valid before putting it in a map
         if (helper.isMovementValid(locationFrom, locationTo)) {
           playerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS - startTimeMS, playerId));
         } else {
@@ -201,23 +203,30 @@ public class GameServlet extends HttpServlet {
          * check if end of game
          */
         // TODO: Implement
+        
+        
         JSONObject jsonResponse = new JSONObject();
         if (winningMovements.size() > 0) {
           // check if targeted field is empty
-          PieceOnLocation pieceOnTargetedField = helper.getBoard().getPieceOnLocation(locationTo);
-          System.out.println("Is targeted position empty? " + (pieceOnTargetedField == null));
-          if (pieceOnTargetedField != null) {
-            // remove a piece from the board
-            helper.removePiece(locationTo);
+          try {
+            PieceOnLocation pieceOnTargetedField = helper.getBoard().getPieceOnLocation(locationTo);
+            LOGGER.debug("Is targeted position empty? " + (pieceOnTargetedField == null));
+            if (pieceOnTargetedField != null) {
+              // remove a piece from the board
+              helper.removePiece(locationTo);
+              LOGGER.debug(pieceOnTargetedField + " removed");
 
-            // test if removed
-            try {
-              pieceOnTargetedField = helper.getBoard().getPieceOnLocation(locationTo);
-              LOGGER.debug("ERROR: Targeted position should be empty.");
-            } catch (com.mgs.chess.core.PieceNotFoundException e) {
-              pieceOnTargetedField = null; // if it took some other piece
-              LOGGER.debug("Targeted position is now empty.");
+              // test if removed
+              try {
+                pieceOnTargetedField = helper.getBoard().getPieceOnLocation(locationTo);
+                LOGGER.debug("ERROR: Targeted position should be empty.");
+              } catch (com.mgs.chess.core.PieceNotFoundException e) {
+                pieceOnTargetedField = null; // if it took some other piece
+                LOGGER.debug("OK: Targeted position is now empty.");
+              }
             }
+          } catch (PieceNotFoundException e) {
+            LOGGER.debug("Targeted field \'" + locationTo + "\' is empty");
           }
 
           /*

@@ -7,9 +7,8 @@ import com.mgs.chess.core.movement.Movement;
 
 public class IsOnInitialRowCondition implements Condition {
 
-	@Override
-	public boolean isApplicable(PieceOnLocation pieceOnLocation, Location locationTo, ChessBoard board, Movement previousMovement) {
-		return pieceOnLocation.isOnInitialRow ();
-	}
-
+  @Override
+  public boolean isApplicable(PieceOnLocation pieceOnLocation, Location locationTo, ChessBoard board, Movement previousMovement) {
+    return pieceOnLocation.isOnInitialRow();
+  }
 }

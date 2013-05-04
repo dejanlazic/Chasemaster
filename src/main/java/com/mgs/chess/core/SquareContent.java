@@ -23,8 +23,6 @@ public interface SquareContent {
 	}
 	
 	public boolean isEmpty ();
-
 	public Color getContentColor();
-
 	public Piece asPiece();
 }
