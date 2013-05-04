@@ -27,6 +27,7 @@ import com.chasemaster.util.GameHelper;
 import com.mgs.chess.core.Location;
 import com.mgs.chess.core.Piece;
 import com.mgs.chess.core.PieceNotFoundException;
+import com.mgs.chess.core.PieceOnLocation;
 import com.mgs.chess.core.movement.Movement;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -123,9 +124,7 @@ public class GameServlet extends HttpServlet {
       String playerId = request.getParameter("playerid"); // from hidden field
       LOGGER.debug("playerId=" + playerId + ": " + positionFrom + "," + positionTo);
 
-      /*
-       * Chess objects
-       */
+      // Chess objects
       Location locationFrom = Location.forString(positionFrom);
       Location locationTo = Location.forString(positionTo);
       Piece piece = helper.getPiece(locationFrom);
@@ -165,9 +164,8 @@ public class GameServlet extends HttpServlet {
           failedPlayerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS - startTimeMS, playerId));
         }
       }
-      // Check if all remaining (100 initially, but configurable),
-      // active users (requests) arrived before sending responses
 
+      // Check if all remaining active users (requests) arrived before sending responses
       int numberOfMovements = playerMovementPairs.size() + failedPlayerMovementPairs.size();
       LOGGER.debug("numberOfMovements - total: " + numberOfMovements);
       LOGGER.debug("numberOfMovements - correct: " + playerMovementPairs.size());
@@ -193,7 +191,7 @@ public class GameServlet extends HttpServlet {
         LOGGER.debug("Determined winning movements: " + winningMovements);
         LOGGER.debug("Determined losing movements: " + losingMovements);
 
-        // decrease initial (configured) number of black players
+        // decrease number of black players
         if (!helper.isTurnWhite()) {
           numberOfActivePlayers = winningMovements.size();
           LOGGER.debug("numberOfActivePlayers changed: " + numberOfActivePlayers);
@@ -203,25 +201,41 @@ public class GameServlet extends HttpServlet {
          * check if end of game
          */
         // TODO: Implement
-
         JSONObject jsonResponse = new JSONObject();
         if (winningMovements.size() > 0) {
+          // check if targeted field is empty
+          PieceOnLocation pieceOnTargetedField = helper.getBoard().getPieceOnLocation(locationTo);
+          System.out.println("Is targeted position empty? " + (pieceOnTargetedField == null));
+          if (pieceOnTargetedField != null) {
+            // remove a piece from the board
+            helper.removePiece(locationTo);
+
+            // test if removed
+            try {
+              pieceOnTargetedField = helper.getBoard().getPieceOnLocation(locationTo);
+              LOGGER.debug("ERROR: Targeted position should be empty.");
+            } catch (com.mgs.chess.core.PieceNotFoundException e) {
+              pieceOnTargetedField = null; // if it took some other piece
+              LOGGER.debug("Targeted position is now empty.");
+            }
+          }
+
           /*
            * make movement on the board
            */
           Movement winMovement = winningMovements.get(0);
           LOGGER.debug("Perform movement on board: " + winMovement);
           helper.performMovement(winMovement);
-          
+
           try {
-            LOGGER.debug("Piece on " + locationFrom + ": " + helper.getBoard().getPieceOnLocation(locationFrom));
+            LOGGER.debug("Piece on FROM(" + locationFrom + "): " + helper.getBoard().getPieceOnLocation(locationFrom));
           } catch (PieceNotFoundException e) {
-            LOGGER.debug("Piece on " + locationFrom + " not found on the board");
+            LOGGER.debug("Piece on FROM(" + locationFrom + ") not found on the board");
           }
           try {
-            LOGGER.debug("Piece on " + locationTo + ": " + helper.getBoard().getPieceOnLocation(locationTo));
+            LOGGER.debug("Piece on TO(" + locationTo + "): " + helper.getBoard().getPieceOnLocation(locationTo));
           } catch (PieceNotFoundException e) {
-            LOGGER.debug("Piece on " + locationTo + " not found on the board");
+            LOGGER.debug("Piece on TO(" + locationTo + ") not found on the board");
           }
 
           /*
@@ -250,7 +264,7 @@ public class GameServlet extends HttpServlet {
         }
         jsonResponse.put("gameOver", gameOver);
         LOGGER.debug("JSON: " + jsonResponse.toJSONString());
-        
+
         /*
          * send response to all players
          */

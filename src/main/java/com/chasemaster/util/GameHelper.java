@@ -57,20 +57,29 @@ public class GameHelper {
             Piece.BLACK_QUEEN, Location.E8).addPiece(Piece.BLACK_BISHOP, Location.F8).addPiece(Piece.BLACK_KNIGHT, Location.G8).addPiece(
             Piece.BLACK_ROOK, Location.H8);
 
-    context.setAttribute(CHESSBOARD, board);
+    setBoard(board);
   }
 
   public ChessBoard getBoard() {
     return (ChessBoard) context.getAttribute(CHESSBOARD);
   }
 
+  private void setBoard(ChessBoard board) {
+    context.setAttribute(CHESSBOARD, board);
+  }
+  
   public Piece getPiece(Location location) {
     return getBoard().getPieceOnLocation(location).getPiece();
   }
 
+  public void removePiece(Location location) {
+    ChessBoard board = getBoard().empty(location);
+    setBoard(board);
+  }
+
   public void performMovement(Movement movement) {
     ChessBoard board = getBoard().performMovement(movement.getMovingPiece(), movement.getFrom(), movement.getTo());
-    context.setAttribute(CHESSBOARD, board);
+    setBoard(board);
   }
   
   /*

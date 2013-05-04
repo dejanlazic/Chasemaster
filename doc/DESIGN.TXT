@@ -14,19 +14,4 @@ Layers:
 - see Journal #5 for details about Asynchronous Ajax details (instead of WS)
 
 
-* Required (prerequisites):
 
-- Java JRE 6
-- Tomcat 7
-- MySQL RDBMS 5
-- Internet browser which supports CSS 3: FF v?, IE v?, Chrome v?
-
-
-
-* 2 types of players:
-- single (doesn't require registration; winner form a current match stays); starts as WHITE
-- group (requires registration, registered player automatically put in GROUP); starts as BLACK
-
-* 2 Servlets
-- Central Controller: MVC pattern (basic functinalities)
-- Game: asynchronous servlet that handles Ajax reqests and postponed responses (server push technology)
