@@ -21,13 +21,42 @@ CREATE TABLE players (
    	colour VARCHAR(10) NOT NULL,
 	registered_on DATE,
 	PRIMARY KEY (id)
-)engine=innodb;	
+) engine=innodb;	
+
+CREATE TABLE matches (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	played_on DATE,
+	PRIMARY KEY (id)
+) engine=innodb;	
+
+CREATE TABLE turns (
+	id INTEGER NOT NULL AUTO_INCREMENT,
+	match_id INTEGER NOT NULL,
+	colour VARCHAR(10),
+	winners VARCHAR(300) NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY (match_id) REFERENCES matches(id)
+) engine=innodb;	
+
+CREATE TABLE movements (
+	id INTEGER NOT NULL AUTO_INCREMENT,
+	turn_id INTEGER NOT NULL,
+	player_id INTEGER NOT NULL,
+	location_from VARCHAR(2),
+	location_to VARCHAR(2),
+	duration BIGINT NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY (turn_id) REFERENCES turns(id),
+	FOREIGN KEY (player_id) REFERENCES players(id)
+) engine=innodb;	
 
 COMMIT;
 
-
 SHOW TABLES;
 DESC players;
+DESC matches;
+DESC turns;
+DESC movements;
 
 -- create admin user and grant necessary privileges --
 

@@ -47,54 +47,25 @@
       <param-name>playerDAOClassName</param-name>
       <param-value>com.chasemaster.persistence.db.mysql.PlayerDAOImpl</param-value>
     </init-param>
-    <init-param>
-      <param-name>gameDAOClassName</param-name>
-      <param-value>com.chasemaster.persistence.db.mysql.GameDAOImpl</param-value>
+   <init-param>
+      <param-name>matchDAOClassName</param-name>
+      <param-value>com.chasemaster.persistence.db.mysql.MatchDAOImpl</param-value>
     </init-param>
-
+    <init-param>
+      <param-name>turnDAOClassName</param-name>
+      <param-value>com.chasemaster.persistence.db.mysql.TurnDAOImpl</param-value>
+    </init-param>
+    <init-param>
+      <param-name>movementDAOClassName</param-name>
+      <param-value>com.chasemaster.persistence.db.mysql.MovementDAOImpl</param-value>
+    </init-param>
+    
     <load-on-startup>1</load-on-startup>
   </servlet>
 
   <servlet>
     <servlet-name>GameServlet</servlet-name>
     <servlet-class>com.chasemaster.web.GameServlet</servlet-class>
-
-    <!-- Game settings -->
-    <init-param>
-      <param-name>playersNum</param-name>
-      <param-value>2</param-value>
-    </init-param>
-    <!-- MySQL RDBMS -->
-    <init-param>
-      <param-name>jdbcDriverClassName</param-name>
-      <param-value>com.mysql.jdbc.Driver</param-value>
-    </init-param>
-    <init-param>
-      <param-name>dbURL</param-name>
-      <param-value>jdbc:mysql://localhost:3306/chasemaster</param-value>
-      <!-- param-value>jdbc:mysql://localhost/chasemaster</param-value -->
-    </init-param>
-    <init-param>
-      <param-name>dbUsername</param-name>
-      <param-value>root</param-value>
-    </init-param>
-    <init-param>
-      <param-name>dbPassword</param-name>
-      <param-value>admin</param-value>
-    </init-param>
-    <!-- DAO implementation -->
-    <init-param>
-      <param-name>authDAOClassName</param-name>
-      <param-value>com.chasemaster.persistence.db.mysql.AuthenticationDAOImpl</param-value>
-    </init-param>
-    <init-param>
-      <param-name>playerDAOClassName</param-name>
-      <param-value>com.chasemaster.persistence.db.mysql.PlayerDAOImpl</param-value>
-    </init-param>
-    <init-param>
-      <param-name>gameDAOClassName</param-name>
-      <param-value>com.chasemaster.persistence.db.mysql.GameDAOImpl</param-value>
-    </init-param>
 
     <async-supported>true</async-supported>    
   </servlet>

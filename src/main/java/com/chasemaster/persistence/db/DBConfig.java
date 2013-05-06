@@ -11,7 +11,9 @@ public class DBConfig {
    
    private static String authDaoClassName;
    private static String playerDaoClassName;
-   private static String gameDaoClassName;
+   private static String matchDaoClassName;
+   private static String turnDaoClassName;
+   private static String movementDaoClassName;
 
    /*
     * Private constructor prevents instantiating of the object
@@ -20,9 +22,9 @@ public class DBConfig {
    private DBConfig() {
    }
 
-   // TODO: Use array of DAOs as the last attribute
    public static void setValues(String jdbcDriverClassName, String databaseURL, String databaseUsername,
-         String databasePassword, String authDaoClassName, String playerDaoClassName, String gameDaoClassName) {
+         String databasePassword, String authDaoClassName, String playerDaoClassName, String matchDaoClassName, 
+         String turnDaoClassName, String movementDaoClassName) {
       DBConfig.jdbcDriverClassName = jdbcDriverClassName;
       DBConfig.databaseURL = databaseURL;
       DBConfig.databaseUsername = databaseUsername;
@@ -30,7 +32,9 @@ public class DBConfig {
 
       DBConfig.authDaoClassName = authDaoClassName;
       DBConfig.playerDaoClassName = playerDaoClassName;
-      DBConfig.gameDaoClassName = gameDaoClassName;
+      DBConfig.matchDaoClassName = matchDaoClassName;
+      DBConfig.turnDaoClassName = turnDaoClassName;
+      DBConfig.movementDaoClassName = movementDaoClassName;
    }
 
    /**
@@ -76,9 +80,23 @@ public class DBConfig {
    }
 
    /**
-    * @return The user DAO implementation class name.
+    * @return The match DAO implementation class name.
     */
-   public static String getGameDaoClassName() {
-      return DBConfig.gameDaoClassName;
+   public static String getMatchDaoClassName() {
+      return DBConfig.matchDaoClassName;
+   }
+   
+   /**
+    * @return The turn DAO implementation class name.
+    */
+   public static String getTurnDaoClassName() {
+      return DBConfig.turnDaoClassName;
+   }
+
+   /**
+    * @return The movement DAO implementation class name.
+    */
+   public static String getMovementDaoClassName() {
+      return DBConfig.movementDaoClassName;
    }
 }

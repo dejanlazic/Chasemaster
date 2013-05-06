@@ -25,9 +25,8 @@ public class AuthenticationService {
   }
 
   public Player login(String username, String password) throws ServiceException, LoginException {
-    LOGGER.debug("User to login: " + username);
+    LOGGER.debug("(SRV) --> User to login: " + username);
 
-    // TODO: Check in JavaScript
     if (username == null) {
       throw new RuntimeException("User credentials cannot be null or empty");
     }

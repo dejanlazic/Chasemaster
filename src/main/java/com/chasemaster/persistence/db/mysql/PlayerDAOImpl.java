@@ -57,7 +57,7 @@ public class PlayerDAOImpl extends PlayerDAO {
 
       stmt.executeUpdate();
 
-      LOGGER.info("USER CREATED -> " + username);
+      LOGGER.info("(DB) --> User created: username=" + username);
 
       con.commit();
     } catch (SQLException sqe) {
@@ -97,7 +97,7 @@ public class PlayerDAOImpl extends PlayerDAO {
         rs.beforeFirst();
         rs.last();
         int size = rs.getRow();
-        LOGGER.info("ResultSet size: " + size);
+        LOGGER.debug("(DB) --> ResultSet size: " + size);
         if (size == 0) {
           throw new NoResultException();
         }
@@ -115,7 +115,7 @@ public class PlayerDAOImpl extends PlayerDAO {
 
         player = new Player(id, uName, Colour.forString(colour));
 
-        LOGGER.info("Selected: " + player);
+        LOGGER.info("(DB) --> Found: " + player);
       }
       con.commit();
 

@@ -50,7 +50,7 @@ public class ControllerServlet extends HttpServlet implements PageConst {
 
     // put in context the initial number of group players
     context.setAttribute(INIT_PARAM_PLAYERS_NUM, config.getInitParameter(INIT_PARAM_PLAYERS_NUM));
-    LOGGER.debug(INIT_PARAM_PLAYERS_NUM + "=" + context.getAttribute(INIT_PARAM_PLAYERS_NUM));
+    LOGGER.debug(INIT_PARAM_PLAYERS_NUM + ": " + context.getAttribute(INIT_PARAM_PLAYERS_NUM));
 
     // get initialization parameters from the deployment descriptor (web.xml)
     String jdbcDriverClassName = config.getInitParameter("jdbcDriverClassName");
@@ -59,21 +59,26 @@ public class ControllerServlet extends HttpServlet implements PageConst {
     String databasePassword = config.getInitParameter("dbPassword");
     String authDaoClassName = config.getInitParameter("authDAOClassName");
     String playerDaoClassName = config.getInitParameter("playerDAOClassName");
-    String gameDaoClassName = config.getInitParameter("gameDAOClassName");
+    String matchDaoClassName = config.getInitParameter("matchDAOClassName");
+    String turnDaoClassName = config.getInitParameter("turnDAOClassName");
+    String movementDaoClassName = config.getInitParameter("movementDAOClassName");
 
     // set database configuration parameters
     DBConfig.setValues(jdbcDriverClassName, databaseUrl, databaseUsername, databasePassword, authDaoClassName,
-        playerDaoClassName, gameDaoClassName);
+        playerDaoClassName, matchDaoClassName, turnDaoClassName, movementDaoClassName);
 
-    LOGGER.debug("jdbcDriverClassName=" + DBConfig.getJDBCDriverClassName());
-    LOGGER.debug("databaseUrl=" + DBConfig.getDatabaseURL());
-    LOGGER.debug("databaseUsername=" + DBConfig.getDatabaseUsername());
-    LOGGER.debug("databasePassword=" + DBConfig.getDatabasePassword());
-    LOGGER.debug("authDaoClassName=" + DBConfig.getAuthDaoClassName());
-    LOGGER.debug("playerDaoClassName=" + DBConfig.getPlayerDaoClassName());
-    LOGGER.debug("gameDaoClassName=" + DBConfig.getGameDaoClassName());
+    LOGGER.debug("jdbcDriverClassName: " + DBConfig.getJDBCDriverClassName());
+    LOGGER.debug("databaseUrl: " + DBConfig.getDatabaseURL());
+    LOGGER.debug("databaseUsername: " + DBConfig.getDatabaseUsername());
+    LOGGER.debug("databasePassword: " + DBConfig.getDatabasePassword());
+    LOGGER.debug("authDaoClassName: " + DBConfig.getAuthDaoClassName());
+    LOGGER.debug("playerDaoClassName: " + DBConfig.getPlayerDaoClassName());
+    LOGGER.debug("matchDaoClassName: " + DBConfig.getMatchDaoClassName());
+    LOGGER.debug("turnDaoClassName: " + DBConfig.getTurnDaoClassName());
+    LOGGER.debug("movementDaoClassName: " + DBConfig.getMovementDaoClassName());
 
     try {
+      // DB conn and DAO configured in web.xml
       playerService = new PlayerService();
       authenticationService = new AuthenticationService();
     } catch (ServiceException e) {

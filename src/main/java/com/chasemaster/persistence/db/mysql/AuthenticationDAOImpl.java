@@ -54,7 +54,7 @@ public class AuthenticationDAOImpl extends AuthenticationDAO {
         rs.beforeFirst();
         rs.last();
         int size = rs.getRow();
-        LOGGER.info("ResultSet size: " + size);
+        LOGGER.debug("(DB) --> ResultSet size: " + size);
         if (size == 0) {
           throw new NoResultException();
         }
@@ -73,7 +73,7 @@ public class AuthenticationDAOImpl extends AuthenticationDAO {
         
         player = new Player(id, uname, Colour.forString(colour));
         
-        LOGGER.info("User authenticated. " + player);
+        LOGGER.info("(DB) --> User authenticated: " + player);
       }
       con.commit();
 

@@ -23,8 +23,9 @@ import org.apache.log4j.Logger;
 import com.chasemaster.exception.NoMovementException;
 import com.chasemaster.exception.NoObjectInContextException;
 import com.chasemaster.persistence.model.Player;
+import com.chasemaster.service.GameService;
+import com.chasemaster.service.ServiceException;
 import com.chasemaster.util.GameHelper;
-import com.mgs.chess.core.Color;
 import com.mgs.chess.core.Location;
 import com.mgs.chess.core.Piece;
 import com.mgs.chess.core.PieceNotFoundException;
@@ -39,6 +40,8 @@ import static com.chasemaster.util.GameConst.*;
 // @WebServlet(urlPatterns = { "/Game" }, asyncSupported = true)
 public class GameServlet extends HttpServlet {
   private static final Logger LOGGER = Logger.getLogger(GameServlet.class);
+
+  private GameService gameService;
 
   private List<AsyncContext> contexts = new LinkedList<AsyncContext>();
   private ServletContext context;
@@ -55,9 +58,8 @@ public class GameServlet extends HttpServlet {
     super.init(config);
 
     context = config.getServletContext();
-
-    // initial number of group players
-    context.setAttribute(INIT_PARAM_PLAYERS_NUM, config.getInitParameter(INIT_PARAM_PLAYERS_NUM));
+    helper = new GameHelper(context);
+    
     // current colour on move (starting with WHITE)
     context.setAttribute(TURN_WHITE, new Boolean(true));
     // this time is used to measure durations of all BLACK movements to find a group
@@ -65,10 +67,24 @@ public class GameServlet extends HttpServlet {
     // but all other times during a match it is reset before sending response to all players
     context.setAttribute(START_TIME, new Date());
 
-    // this initial value will be decreasing in doPost() as a game progress
+    // initial number of group players (configured in web.xml and ControllerServlet)
+    // will be decreasing in doPost() as a game progress
     numberOfActivePlayers = Integer.parseInt((String) context.getAttribute(INIT_PARAM_PLAYERS_NUM));
 
-    helper = new GameHelper(context);
+    try {
+      // Note: DB conn and DAO configured in web.xml and ControllerServlet
+      gameService = new GameService();
+      gameService.saveMatch(new Date());
+    } catch (ServiceException e) {
+      LOGGER.error(e.getMessage());
+    }
+    
+    try {
+      Integer maxMatchId = gameService.getMaxMatchId(); // retrieve current match id
+      context.setAttribute(MATCH_ID, maxMatchId);
+    } catch (ServiceException e) {
+      LOGGER.error(e.getMessage());
+    }
   }
 
   /*
@@ -246,39 +262,62 @@ public class GameServlet extends HttpServlet {
           /*
            * check if end of game
            */
-          if(helper.isInChess()) {
+          if (helper.isInChess()) {
             LOGGER.debug((helper.isTurnWhite() ? "BLACK" : "WHITE") + " is in chess");
           }
-          if(helper.isInChess() && helper.isCheckMate()) {
-            LOGGER.debug((helper.isTurnWhite() ? "BLACK" : "WHITE") + " is in check mate");            
-          }          
+          if (helper.isInChess() && helper.isCheckMate()) {
+            LOGGER.debug((helper.isTurnWhite() ? "BLACK" : "WHITE") + " is in check mate");
+          }
 
           /*
            * make JSON result
            */
           jsonResponse.put("movementFrom", winningMovements.get(0).getFrom().toString());
           jsonResponse.put("movementTo", winningMovements.get(0).getTo().toString());
-          JSONArray winningList = new JSONArray();
+          JSONArray jsonWinningList = new JSONArray();
           for (Movement winningMovement : winningMovements) {
-            winningList.add(winningMovement.getPlayerId());
+            jsonWinningList.add(winningMovement.getPlayerId());
           }
-          jsonResponse.put("winningPlayers", winningList);
+          jsonResponse.put("winningPlayers", jsonWinningList);
         } else {
           jsonResponse.put("movementFrom", "");
           jsonResponse.put("movementTo", "");
           jsonResponse.put("winningPlayers", new JSONArray());
         }
         if (losingMovements.size() > 0) {
-          JSONArray losingList = new JSONArray();
+          JSONArray jsonLosingList = new JSONArray();
           for (Movement losingMovement : losingMovements) {
-            losingList.add(losingMovement.getPlayerId());
+            jsonLosingList.add(losingMovement.getPlayerId());
           }
-          jsonResponse.put("losingPlayers", losingList);
+          jsonResponse.put("losingPlayers", jsonLosingList);
         } else {
           jsonResponse.put("losingPlayers", new JSONArray());
         }
         jsonResponse.put("gameOver", gameOver);
         LOGGER.debug("JSON: " + jsonResponse.toJSONString());
+
+        /*
+         * write to database
+         */
+        List<String> winningList = new ArrayList<String>(); // only contains IDs
+        for (Movement winningMovement : winningMovements) {
+          winningList.add(winningMovement.getPlayerId());
+        }
+        try {
+          int turnId = gameService.saveTurn(((Integer) context.getAttribute(MATCH_ID)), 
+              (helper.isTurnWhite() ? "WHITE" : "BLACK"), winningList);
+
+          for (Movement winningMovement : winningMovements) {
+            gameService.saveMovement(turnId, Integer.parseInt(winningMovement.getPlayerId()), 
+                winningMovement.getFrom().toString(), winningMovement.getTo().toString(), winningMovement.getDuration());
+          }
+          for (Movement losingMovement : losingMovements) {
+            gameService.saveMovement(turnId, Integer.parseInt(losingMovement.getPlayerId()), 
+                losingMovement.getFrom().toString(), losingMovement.getTo().toString(), losingMovement.getDuration());
+          }
+        } catch (ServiceException se) {
+          LOGGER.error(se.getMessage());
+        }
 
         /*
          * send response to all players
