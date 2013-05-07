@@ -15,85 +15,36 @@
 
 <body>
    <div id="main">
-      <h1>Login</h1>
-      
       <!-- INPUT FORM -->
       
-    <div class="form">
-      <form method="post" action="login.do" onSubmit="return validateLoginForm();">
-          <table>
-            <tr>
-              <td>Username</td>
-            </tr>
-            <tr>
-              <td><input id="username" name="username" value="player01" /></td>
-            </tr>
-            <tr>
-              <td>Password</td>
-            </tr>
-            <tr>
-              <td><input id="password" name="password" value="player01" /></td>
-            </tr>
-            <tr>
-              <td><p id="message" style="color:red;"></p></td>
-            </tr>
-            <tr>
-              <td align="left"><input type="submit" value="Submit" class="btn" /></td>
-            </tr>
-          </table>
-      </form>
-    </div>
-  
-    <a href="/Chasemaster/registrationForm.do">Registration</a>
+      <div class="form">
+        <h1>Login</h1>
       
-      <!-- OUTPUT DATA -->
-      
-      <h3><c:out value="${city.name}"/></h3>
+        <form method="post" action="login.do" onSubmit="return validateLoginForm();">
+            <table>
+              <tr>
+                <td>Username</td>
+              </tr>
+              <tr>
+                <td><input id="username" name="username" value="player01" /></td>
+              </tr>
+              <tr>
+                <td>Password</td>
+              </tr>
+              <tr>
+                <td><input id="password" name="password" value="player01" /></td>
+              </tr>
+              <tr>
+                <td><p id="message" style="color:red;"></p></td>
+              </tr>
+              <tr>
+                <td align="left"><input type="submit" value="Submit" class="btn" /></td>
+              </tr>
+            </table>
+        </form>
 
-      <c:if test="${!empty dataList}">
-         <h5>Weather</h5>
-                  
-         <c:forEach var="weatherData" items="${dataList}" varStatus="counter">
-            <c:choose>
-               <c:when test="${counter.first}">
-                  <table class="table table-bordered table-striped">
-                     <thead>
-                        <tr>
-                           <th style="width: 50%;">Current conditions</th>
-                           <th style="width: 50%;">&nbsp;</th>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        <tr>
-                           <td>Pressure</td>
-                           <td><c:out value="${weatherData.pressure}"/></td>
-                        </tr>
-                     </tbody>
-                  </table>                        
-               </c:when>
-               <c:otherwise>
-                  <table class="table table-bordered table-striped">
-                     <thead>
-                        <tr>
-                           <th style="width: 50%;">Date</th>
-                           <th style="width: 50%;"><c:out value="${weatherData.date}"/></th>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        <tr>
-                           <td>Temperature min. (C)</td>
-                           <td><c:out value="${weatherData.tempMinC}"/></td>
-                        </tr>
-                        <tr>
-                           <td>Temperature max. (C)</td>
-                           <td><c:out value="${weatherData.tempMaxC}"/></td>
-                        </tr>                              
-                     </tbody>
-                  </table>
-               </c:otherwise>
-            </c:choose>
-         </c:forEach>               
-      </c:if>                      
+        <a href="/Chasemaster/registrationForm.do">Registration</a>
+      </div>
    </div>
 </body>
 </html>

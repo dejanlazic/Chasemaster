@@ -1,5 +1,6 @@
 package com.chasemaster.service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import com.chasemaster.persistence.DAOException;
 import com.chasemaster.persistence.MatchDAO;
 import com.chasemaster.persistence.MovementDAO;
 import com.chasemaster.persistence.TurnDAO;
+import com.chasemaster.persistence.model.Match;
 
 public class GameService {
   private static final Logger LOGGER = Logger.getLogger(GameService.class);
@@ -54,7 +56,39 @@ public class GameService {
       LOGGER.error(e.getMessage());
     }
   }
-  
+
+  /**
+   * 
+   * @param id
+   * @return
+   * @throws ServiceException
+   */
+  public Match getMatch(int id) throws ServiceException {
+    // TODO: Implement
+    return null;
+  }
+
+  /**
+   * Retrieves all matches, sorted by date
+   * 
+   * @return List of matches
+   * @throws ServiceException
+   */
+  public List<Match> getMatches() throws ServiceException {
+    if (matchDao == null) {
+      throw new ServiceException("Match DAO is null");
+    }
+
+    List<Match> matches = null;    
+    try {
+      matches = matchDao.readAll();      
+    } catch (MatchException e) {
+      LOGGER.error(e.getMessage());
+    }
+    
+    return matches;
+  }
+
   /**
    * Retrieves the largest Match identifier
    * 

@@ -74,7 +74,6 @@ public class GameServlet extends HttpServlet {
     try {
       // Note: DB conn and DAO configured in web.xml and ControllerServlet
       gameService = new GameService();
-      gameService.saveMatch(new Date());
     } catch (ServiceException e) {
       LOGGER.error(e.getMessage());
     }

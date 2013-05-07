@@ -1,9 +1,11 @@
 package com.chasemaster.persistence;
 
 import java.util.Date;
+import java.util.List;
 
 import com.chasemaster.exception.MatchException;
 import com.chasemaster.persistence.db.DBConfig;
+import com.chasemaster.persistence.model.Match;
 
 public abstract class MatchDAO implements ChasemasterDAO {
    private static MatchDAO instance;
@@ -26,5 +28,6 @@ public abstract class MatchDAO implements ChasemasterDAO {
    }
 
    public abstract void create(Date playOn) throws MatchException;
+   public abstract List<Match> readAll() throws MatchException;
    public abstract int readMaxId() throws MatchException;
 }

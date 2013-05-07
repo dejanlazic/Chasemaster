@@ -20,6 +20,15 @@
       <param-name>playersNum</param-name>
       <param-value>2</param-value>
     </init-param>
+    <!-- Game administrator -->
+    <init-param>
+      <param-name>adminUsername</param-name>
+      <param-value>admin</param-value>
+    </init-param>
+    <init-param>
+      <param-name>adminPassword</param-name>
+      <param-value>admin</param-value>
+    </init-param>    
     <!-- MySQL RDBMS -->
     <init-param>
       <param-name>jdbcDriverClassName</param-name>

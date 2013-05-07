@@ -7,7 +7,8 @@ public interface PageConst {
   String ERROR_PAGE         = PREFIX    + "error"          + SUFFIX;  
   String LOGIN_PAGE         = PREFIX    + "login"          + SUFFIX;  
   String REGISTRATION_PAGE  = PREFIX    + "registration"   + SUFFIX;
-  String GAME_PAGE          = PREFIX    + "game"            + SUFFIX;
+  String ADMIN_PAGE         = PREFIX    + "admin"          + SUFFIX;
+  String GAME_PAGE          = PREFIX    + "game"           + SUFFIX;
   String HOME_PAGE = "/home.jsp";
   
   

@@ -25,7 +25,7 @@ CREATE TABLE players (
 
 CREATE TABLE matches (
 	id INTEGER NOT NULL AUTO_INCREMENT, 
-	played_on DATE,
+	play_on TIMESTAMP NOT NULL,
 	PRIMARY KEY (id)
 ) engine=innodb;	
 
