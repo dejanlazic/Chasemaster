@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -13,6 +15,7 @@ import com.chasemaster.persistence.DAOException;
 import com.chasemaster.persistence.TurnDAO;
 import com.chasemaster.persistence.db.DBConfig;
 import com.chasemaster.persistence.db.DBUtil;
+import com.chasemaster.persistence.model.Turn;
 
 /**
  * An implementation of the TurnDAO that uses MySQL JDBC.
@@ -62,6 +65,55 @@ public class TurnDAOImpl extends TurnDAO {
     } finally {
       DBUtil.close(stmt, con);
     }
+  }
+
+  @Override
+  public List<Turn> readAll(int matchId) throws TurnException {
+    final String sql = "SELECT * FROM turns WHERE match_id=? ORDER BY id";
+
+    Connection con = null;
+    PreparedStatement stmt = null;
+
+    List<Turn> turns = new ArrayList<Turn>();
+    try {
+      con = DBUtil.getConnection();
+      stmt = con.prepareStatement(sql);
+      stmt.setInt(1, matchId);
+
+      ResultSet rs = stmt.executeQuery();
+      if (rs != null) {
+        while (rs.next()) {
+          Turn turn = new Turn(rs.getInt("id"));
+          turn.setColour(rs.getString("colour"));
+          String winnersConcat = rs.getString("winners");
+          String[] winnersArr = winnersConcat.split("|");
+          List<Integer> winners = new ArrayList<Integer>();
+          for(String w : winnersArr) {
+            if(w != null && !w.equals("") && !w.equals("|")) 
+              winners.add(Integer.parseInt(w));
+          }
+          turn.setWinners(winners);
+          
+          turns.add(turn);
+        }
+      }
+
+      LOGGER.info("(DB)--> Turns selected: " + turns);
+
+      rs.close();
+      // con.commit();
+    } catch (SQLException sqe) {
+      // try {
+      // con.rollback();
+      // } catch (SQLException e) {
+      // e.printStackTrace();
+      // }
+      throw new TurnException(sqe.getMessage());
+    } finally {
+      DBUtil.close(stmt, con);
+    }
+
+    return turns;
   }
 
   @Override

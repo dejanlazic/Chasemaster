@@ -177,16 +177,15 @@ public class ControllerServlet extends HttpServlet implements PageConst {
     /*
      * 1) user is administrator
      */
-    if (username.equals(context.getAttribute(ADMIN_USERNAME)) 
-        && password.equals(context.getAttribute(ADMIN_PASSWORD))) {
+    if (username.equals(context.getAttribute(ADMIN_USERNAME)) && password.equals(context.getAttribute(ADMIN_PASSWORD))) {
       LOGGER.info("Administrator authenticated.");
-      
+
       try {
         request.setAttribute("matchesList", gameService.getMatches());
       } catch (ServiceException e) {
         LOGGER.error(e.getMessage());
       }
-      
+
       isAdmin = true;
       destinationPage = ADMIN_PAGE;
     }
@@ -262,19 +261,20 @@ public class ControllerServlet extends HttpServlet implements PageConst {
     String matchId = request.getParameter("id");
     LOGGER.info("Retrieving a match for given parameter: id=" + matchId);
 
-
-    // retrieve role id from db for use in relationship with user
-//    try {
-//      String s = playerService.register(username, password);
-//      destinationPage = LOGIN_PAGE;
-//      LOGGER.debug("Registration done. " + s);
-//    } catch (ServiceException e) {
-//      request.setAttribute("errorMessage", e.getMessage());
-//      destinationPage = ERROR_PAGE; // TODO Handle this
-//    } catch (RegistrationException e) {
-//      request.setAttribute("errorMessage", e.getMessage());
-//      destinationPage = ERROR_PAGE;
-//    }
+    // retrieve a match for given id
+    try {
+      if(matchId != null) {
+        request.setAttribute("match", gameService.getMatch(Integer.parseInt(matchId)));
+        request.setAttribute("matchesList", gameService.getMatches());
+        destinationPage = ADMIN_PAGE;
+      } else {
+        request.setAttribute("errorMessage", "Match identifier is null");
+        destinationPage = ERROR_PAGE; // TODO Handle this
+      }
+    } catch (ServiceException e) {
+      request.setAttribute("errorMessage", e.getMessage());
+      destinationPage = ERROR_PAGE;
+    }
   }
 
   private void processCreateMatch(HttpServletRequest request) {
@@ -282,14 +282,13 @@ public class ControllerServlet extends HttpServlet implements PageConst {
 
     // creates new match and retrieves all existing matches
     try {
-      LOGGER.debug("******** " + new Date());
       gameService.saveMatch(new Date());
       request.setAttribute("matchesList", gameService.getMatches());
+      destinationPage = ADMIN_PAGE;
     } catch (ServiceException e) {
       request.setAttribute("errorMessage", e.getMessage());
       destinationPage = ERROR_PAGE; // TODO Handle this
-    } 
-    destinationPage = ADMIN_PAGE;
+    }
   }
 
   /**

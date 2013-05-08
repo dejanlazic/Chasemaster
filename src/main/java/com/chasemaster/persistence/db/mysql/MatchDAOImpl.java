@@ -17,6 +17,7 @@ import com.chasemaster.persistence.MatchDAO;
 import com.chasemaster.persistence.db.DBConfig;
 import com.chasemaster.persistence.db.DBUtil;
 import com.chasemaster.persistence.model.Match;
+import com.chasemaster.service.ServiceException;
 
 /**
  * An implementation of the MatchDAO that uses MySQL JDBC.
@@ -48,12 +49,12 @@ public class MatchDAOImpl extends MatchDAO {
       stmt = con.prepareStatement(sql);
 
       // convert Java Date to SQL Date
-      //stmt.setDate(1, new java.sql.Date(playOn.getTime()));
+      // stmt.setDate(1, new java.sql.Date(playOn.getTime()));
       stmt.setTimestamp(1, new java.sql.Timestamp(playOn.getTime()));
-      
+
       stmt.executeUpdate();
 
-      LOGGER.info("(DB) --> Match created: playOn=" + playOn);
+      LOGGER.info("(DB)--> Match created: playOn=" + playOn);
 
       con.commit();
     } catch (SQLException sqe) {
@@ -86,7 +87,7 @@ public class MatchDAOImpl extends MatchDAO {
         maxId = rs.getInt("max_id");
       }
 
-      LOGGER.info("(DB) --> Match ID selected: max_id=" + maxId);
+      LOGGER.info("(DB)--> Match ID selected: max_id=" + maxId);
 
       rs.close();
       // con.commit();
@@ -105,30 +106,28 @@ public class MatchDAOImpl extends MatchDAO {
   }
 
   @Override
-  public List<Match> readAll() throws MatchException {
-    final String sql = "SELECT * FROM matches ORDER BY play_on";
+  public Match read(int id) throws MatchException {
+    final String sql = "SELECT * FROM matches WHERE id=?";
 
     Connection con = null;
-    Statement stmt = null;
+    PreparedStatement stmt = null;
 
-    List<Match> matches = new ArrayList<Match>();
+    Match match = null;
     try {
       con = DBUtil.getConnection();
-      stmt = con.createStatement();
+      stmt = con.prepareStatement(sql);      
+      stmt.setInt(1, id);
 
-      ResultSet rs = stmt.executeQuery(sql);
+      ResultSet rs = stmt.executeQuery();
       if (rs != null) {
-        while(rs.next()) {
-          Match match = new Match(rs.getInt("id"));
-          // SQL date to Java date
-          Date playOn = new Date(rs.getTimestamp("play_on").getTime());
-          match.setPlayOn(playOn);
-          
-          matches.add(match);
-        }
+        rs.next();
+        match = new Match(rs.getInt("id"));
+        // SQL date to Java date
+        Date playOn = new Date(rs.getTimestamp("play_on").getTime());
+        match.setPlayOn(playOn);
       }
 
-      LOGGER.info("(DB) --> Matches selected: " + matches);
+      LOGGER.info("(DB)--> Match selected: " + match);
 
       rs.close();
       // con.commit();
@@ -142,7 +141,49 @@ public class MatchDAOImpl extends MatchDAO {
     } finally {
       DBUtil.close(stmt, con);
     }
-    
+
+    return match;
+  }
+
+  @Override
+  public List<Match> readAll() throws MatchException {
+    final String sql = "SELECT * FROM matches ORDER BY play_on";
+
+    Connection con = null;
+    Statement stmt = null;
+
+    List<Match> matches = new ArrayList<Match>();
+    try {
+      con = DBUtil.getConnection();
+      stmt = con.createStatement();
+
+      ResultSet rs = stmt.executeQuery(sql);
+      if (rs != null) {
+        while (rs.next()) {
+          Match match = new Match(rs.getInt("id"));
+          // SQL date to Java date
+          Date playOn = new Date(rs.getTimestamp("play_on").getTime());
+          match.setPlayOn(playOn);
+
+          matches.add(match);
+        }
+      }
+
+      LOGGER.info("(DB)--> Matches selected: " + matches);
+
+      rs.close();
+      // con.commit();
+    } catch (SQLException sqe) {
+      // try {
+      // con.rollback();
+      // } catch (SQLException e) {
+      // e.printStackTrace();
+      // }
+      throw new MatchException(sqe.getMessage());
+    } finally {
+      DBUtil.close(stmt, con);
+    }
+
     return matches;
   }
 }

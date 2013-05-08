@@ -28,6 +28,7 @@ public abstract class MatchDAO implements ChasemasterDAO {
    }
 
    public abstract void create(Date playOn) throws MatchException;
+   public abstract Match read(int id) throws MatchException;
    public abstract List<Match> readAll() throws MatchException;
    public abstract int readMaxId() throws MatchException;
 }

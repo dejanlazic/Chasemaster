@@ -6,11 +6,17 @@ import com.mgs.chess.core.Piece;
 import com.mgs.chess.core.PieceOnLocation;
 
 public class Movement {
+  private int id;
   private Piece piece;
   private Location from;
   private Location to;
   private Long duration;
   private String playerId;
+
+  public Movement(int id) {
+    super();
+    this.id = id;
+  }
 
   public Movement(Piece piece, Location from, Location to) {
     this(piece, from, to, null, null);
@@ -57,10 +63,38 @@ public class Movement {
   public void setPlayerId(String playerId) {
     this.playerId = playerId;
   }
+  
+  public int getId() {
+    return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
+  }
+  
+  public Piece getPiece() {
+    return piece;
+  }
+
+  public void setPiece(Piece piece) {
+    this.piece = piece;
+  }
+
+  public void setFrom(Location from) {
+    this.from = from;
+  }
+
+  public void setTo(Location to) {
+    this.to = to;
+  }
+
+  public void setDuration(Long duration) {
+    this.duration = duration;
+  }
 
   @Override
   public String toString() {
-    return "Movement[piece=" + piece + ", " + "from=" + from + ", to=" + to + ", playerId=" + playerId + ", duration=" + duration + "]";
+    return "Movement[id=" + id + ", piece=" + piece + ", from=" + from + ", to=" + to + ", playerId=" + playerId + ", duration=" + duration + "]";
   }
 
   @Override

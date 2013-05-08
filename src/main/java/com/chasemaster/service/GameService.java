@@ -7,12 +7,14 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.chasemaster.exception.MatchException;
+import com.chasemaster.exception.MovementException;
 import com.chasemaster.exception.TurnException;
 import com.chasemaster.persistence.DAOException;
 import com.chasemaster.persistence.MatchDAO;
 import com.chasemaster.persistence.MovementDAO;
 import com.chasemaster.persistence.TurnDAO;
 import com.chasemaster.persistence.model.Match;
+import com.chasemaster.persistence.model.Turn;
 
 public class GameService {
   private static final Logger LOGGER = Logger.getLogger(GameService.class);
@@ -58,16 +60,57 @@ public class GameService {
   }
 
   /**
-   * 
-   * @param id
-   * @return
+   * Retrieves a match and all belonging turns and movements
+   *  
+   * @param id Match identifier
+   * @return Match
    * @throws ServiceException
    */
   public Match getMatch(int id) throws ServiceException {
-    // TODO: Implement
-    return null;
+    return getMatch(id, true);
   }
 
+  /**
+   * Retrieves a match with or without belonging turns and movements,
+   * depending on provided flag.
+   * 
+   * @param id Match identifier
+   * @param withMovements A flag which determines whether to include belonging turns and movements or not 
+   * @return Match
+   * @throws MatchException
+   */
+  public Match getMatch(int id, boolean withMovements) throws ServiceException {
+    if (matchDao == null) {
+      throw new ServiceException("Match DAO is null");
+    }
+
+    Match match = null;    
+    try {
+      match = matchDao.read(id);    
+      
+      // select belonging turns and movements
+      if(withMovements) {
+        List<Turn> turns = turnDao.readAll(id);
+        
+        // select movements for each turn
+        for(Turn turn : turns) {
+          turn.setMovements(movementDao.readAll(turn.getId()));
+        }
+        
+        match.setTurns(turns);
+      }
+    } catch (MatchException me) {
+      LOGGER.error("Match: " + me.getMessage());
+    } catch (TurnException te) {
+      LOGGER.error("Turn: " + te.getMessage());
+    } catch (MovementException mve) {
+      LOGGER.error("Movement: " + mve.getMessage());
+    }
+    
+    LOGGER.debug("Before returning: " + match);
+    return match;    
+  }
+  
   /**
    * Retrieves all matches, sorted by date
    * 
