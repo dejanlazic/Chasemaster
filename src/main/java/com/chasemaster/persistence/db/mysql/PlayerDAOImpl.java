@@ -37,27 +37,42 @@ public class PlayerDAOImpl extends PlayerDAO {
 
   @Override
   public void create(String username, String password, String colour) throws DAOException {
-    final String sql = "INSERT INTO players (username, password, colour, registered_on)"
-        + " VALUES (?, ?, ?, ?)";
+    final String sqlSel = "SELECT MAX(id) AS max_match_id FROM matches";
+    
+    final String sql = "INSERT INTO players (match_id, username, password, colour, registered_on)"
+        + " VALUES (?, ?, ?, ?, ?)";
 
     Connection con = null;
     PreparedStatement stmt = null;
     
     try {
       con = DBUtil.getConnection();
+      
+      // read
+      stmt = con.prepareStatement(sqlSel);
+      int maxMatchId = -1;
+      ResultSet rs = stmt.executeQuery();
+      if (rs != null) {
+        rs.next(); // there is only value selected, loop unnecessary
+        maxMatchId = rs.getInt("max_match_id");
+        LOGGER.info("(DB)--> Largest match id selected: maxMatchId=" + maxMatchId);
+      }      
+      
+      // write
       stmt = con.prepareStatement(sql);
 
-      stmt.setString(1, username);
-      stmt.setString(2, password);
-      stmt.setString(3, colour);
+      stmt.setInt(1, maxMatchId+1);  // register for a new match
+      stmt.setString(2, username);
+      stmt.setString(3, password);
+      stmt.setString(4, colour);
       // convert Java Date to SQL Date
       java.util.Date currDate = new Date();
       java.sql.Date sqlcurrDate = new java.sql.Date(currDate.getTime());
-      stmt.setDate(4, sqlcurrDate);
+      stmt.setDate(5, sqlcurrDate);
 
       stmt.executeUpdate();
 
-      LOGGER.info("(DB) --> User created: username=" + username);
+      LOGGER.info("(DB)--> User created: matchId=" + maxMatchId+1 + ", username=" + username + ", password=***, colour=" + colour);
 
       con.commit();
     } catch (SQLException sqe) {
@@ -97,7 +112,7 @@ public class PlayerDAOImpl extends PlayerDAO {
         rs.beforeFirst();
         rs.last();
         int size = rs.getRow();
-        LOGGER.debug("(DB) --> ResultSet size: " + size);
+        LOGGER.debug("(DB)--> ResultSet size: " + size);
         if (size == 0) {
           throw new NoResultException();
         }
@@ -115,7 +130,7 @@ public class PlayerDAOImpl extends PlayerDAO {
 
         player = new Player(id, uName, Colour.forString(colour));
 
-        LOGGER.info("(DB) --> Found: " + player);
+        LOGGER.info("(DB)--> Found: " + player);
       }
       con.commit();
 

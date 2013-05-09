@@ -14,8 +14,12 @@ SHOW DATABASES;
 
 USE chasemaster;
 
+-- match_id is NOT foreign key
+-- because its value is written during registration
+-- BEFORE new match is created by admin
 CREATE TABLE players (
 	id INTEGER NOT NULL AUTO_INCREMENT, 
+	match_id INTEGER NOT NULL,
 	username VARCHAR(20) NOT NULL,
 	password VARCHAR(20) NOT NULL,
    	colour VARCHAR(10) NOT NULL,

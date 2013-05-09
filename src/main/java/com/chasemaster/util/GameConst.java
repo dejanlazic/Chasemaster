@@ -22,4 +22,5 @@ public interface GameConst {
   public static final String CHESSBOARD = "board";
   public static final String CHESSBOARD_IMAGES = "boardImages";
   public static final String MATCH_ID = "matchId";
+  public static final String WINNERS = "winners";
 }

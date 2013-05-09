@@ -46,7 +46,7 @@ function validateRegistrationForm() {
   var passwordField = document.getElementById("password");
   var passwordConfirmationField = document.getElementById("passwordConfirmation");
 
-  alert("UN:" + usernameField.value + ", PWD: '" + passwordField.value + "', PWD2: '" + passwordConfirmationField.value + "'");
+  //alert("UN:" + usernameField.value + ", PWD: '" + passwordField.value + "', PWD2: '" + passwordConfirmationField.value + "'");
 
   if (usernameField.value.length == 0) {
     _message.innerHTML = "Username must be entered";

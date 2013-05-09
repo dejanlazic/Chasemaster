@@ -201,9 +201,7 @@ public class GameServlet extends HttpServlet {
         try {
           helper.findWinningMovements(winningMovements, losingMovements, playerMovementPairs, failedPlayerMovementPairs);
         } catch (NoMovementException e1) {
-          // TODO: Finish
-          LOGGER.debug("GAME OVER; winner color: " + helper.isTurnWhite());
-          gameOver = true;
+          //gameOver = true;
         }
 
         LOGGER.debug("Determined winning movements: " + winningMovements);
@@ -269,7 +267,7 @@ public class GameServlet extends HttpServlet {
           }
 
           /*
-           * make JSON result
+           * make JSON result and list of players for session
            */
           jsonResponse.put("movementFrom", winningMovements.get(0).getFrom().toString());
           jsonResponse.put("movementTo", winningMovements.get(0).getTo().toString());
@@ -278,10 +276,31 @@ public class GameServlet extends HttpServlet {
             jsonWinningList.add(winningMovement.getPlayerId());
           }
           jsonResponse.put("winningPlayers", jsonWinningList);
+          context.setAttribute(WINNERS, winningMovements);
         } else {
+          /*
+           * end of game
+           */
+          gameOver = true;
+          
+          // take previous' turn winners
+          List<Movement> winners = (List<Movement>)context.getAttribute(WINNERS);
+          // if more than one black player, pick only one with shortest movement duration
+          long shortestDuration = Long.MAX_VALUE;
+          Movement winner = null;
+          for(Movement move : winners) {
+            if(move.getDuration() < shortestDuration) {
+              winner = move;
+            }
+          } 
+          
+          JSONArray jsonWinningList = new JSONArray();
+          jsonWinningList.add(winner.getPlayerId());
+
+          LOGGER.debug("****************** Game over, winner: " + winner);
           jsonResponse.put("movementFrom", "");
           jsonResponse.put("movementTo", "");
-          jsonResponse.put("winningPlayers", new JSONArray());
+          jsonResponse.put("winningPlayers", jsonWinningList);
         }
         if (losingMovements.size() > 0) {
           JSONArray jsonLosingList = new JSONArray();
@@ -298,6 +317,7 @@ public class GameServlet extends HttpServlet {
         /*
          * write to database
          */
+        // movements
         List<String> winningList = new ArrayList<String>(); // only contains IDs
         for (Movement winningMovement : winningMovements) {
           winningList.add(winningMovement.getPlayerId());
@@ -317,7 +337,23 @@ public class GameServlet extends HttpServlet {
         } catch (ServiceException se) {
           LOGGER.error(se.getMessage());
         }
+        
+        // winner as WHITE player for the next match (if end of game)
+        if(gameOver) {
+          // TODO Finish
+          LOGGER.debug("Game over. Write winner as WHITE player to database: " );
+        }
 
+        /*
+         * test if end of game (if there is no winning movements)
+         */
+        if(winningMovements == null || winningMovements.size() < 1) {
+          LOGGER.debug("****************** Winner is other side: " + ((helper.isTurnWhite())? "BLACK" : "WHITE"));
+        } else {
+          
+        }
+        
+        
         /*
          * send response to all players
          */
