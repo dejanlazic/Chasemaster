@@ -27,5 +27,6 @@ public abstract class PlayerDAO implements ChasemasterDAO {
    }
 
    public abstract void create(String username, String password, String colour) throws DAOException;
-   public abstract Player find(String username) throws NoResultException, NoUniqueResultException, DAOException;
+   public abstract Player read(int id) throws NoResultException, DAOException;
+   public abstract Player read(String username) throws NoResultException, NoUniqueResultException, DAOException;
 }

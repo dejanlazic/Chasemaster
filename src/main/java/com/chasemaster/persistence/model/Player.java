@@ -8,7 +8,9 @@ public class Player implements Serializable {
   private static final long serialVersionUID = 1;
 
   private int id;
+  private int matchId;
   private String username;
+  private String password;
   private String firstName;
   private String lastName;
   private Colour colour;
@@ -75,26 +77,32 @@ public class Player implements Serializable {
     return colour == Colour.WHITE;
   }
 
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+  public int getMatchId() {
+    return matchId;
+  }
+
+  public void setMatchId(int matchId) {
+    this.matchId = matchId;
+  }
+
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("Player[");
     sb.append("id=" + id);
+    sb.append(", matchId=" + matchId);
     sb.append(", username=" + username);
-    // sb.append(", firstName=" + firstName);
-    // sb.append(", lastName=" + lastName);
     sb.append(", colour=" + colour);
     sb.append(", isWhite=" + isWhite());
     sb.append("]");
 
     return sb.toString();
-  }
-
-  // test
-  public static void main(String[] args) {
-    Player p = new Player(1, "p1", Colour.WHITE);
-    System.out.println(p);
-    
-    p = new Player(2, "p2", Colour.BLACK);
-    System.out.println(p);
   }
 }

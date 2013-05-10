@@ -52,7 +52,7 @@ public class TurnDAOImpl extends TurnDAO {
 
       stmt.executeUpdate();
 
-      LOGGER.info("(DB) --> Turn created: matchId=" + matchId + ", colour=" + colour + ", winners=" + winners);
+      LOGGER.info("(DB)--> Turn created: matchId=" + matchId + ", colour=" + colour + ", winners=" + winners);
 
       con.commit();
     } catch (SQLException sqe) {
@@ -134,7 +134,7 @@ public class TurnDAOImpl extends TurnDAO {
         maxId = rs.getInt("max_id");
       }
 
-      LOGGER.info("(DB) --> Turn ID selected: max_id=" + maxId);
+      LOGGER.info("(DB)--> Turn ID selected: max_id=" + maxId);
 
       rs.close();
       // con.commit();

@@ -22,8 +22,10 @@ import org.apache.log4j.Logger;
 
 import com.chasemaster.exception.NoMovementException;
 import com.chasemaster.exception.NoObjectInContextException;
+import com.chasemaster.exception.RegistrationException;
 import com.chasemaster.persistence.model.Player;
 import com.chasemaster.service.GameService;
+import com.chasemaster.service.PlayerService;
 import com.chasemaster.service.ServiceException;
 import com.chasemaster.util.GameHelper;
 import com.mgs.chess.core.Location;
@@ -42,6 +44,7 @@ public class GameServlet extends HttpServlet {
   private static final Logger LOGGER = Logger.getLogger(GameServlet.class);
 
   private GameService gameService;
+  private PlayerService playerService;
 
   private List<AsyncContext> contexts = new LinkedList<AsyncContext>();
   private ServletContext context;
@@ -74,6 +77,7 @@ public class GameServlet extends HttpServlet {
     try {
       // Note: DB conn and DAO configured in web.xml and ControllerServlet
       gameService = new GameService();
+      playerService = new PlayerService();
     } catch (ServiceException e) {
       LOGGER.error(e.getMessage());
     }
@@ -212,10 +216,11 @@ public class GameServlet extends HttpServlet {
           numberOfActivePlayers = winningMovements.size();
           LOGGER.debug("numberOfActivePlayers changed: " + numberOfActivePlayers);
         }
-
+        
+        Movement winner = null;
         JSONObject jsonResponse = new JSONObject();
 
-        if (winningMovements.size() > 0) {
+        if (winningMovements != null && winningMovements.size() > 0) {
           // check if targeted field is empty
           try {
             PieceOnLocation pieceOnTargetedField = helper.getBoard().getPieceOnLocation(locationTo);
@@ -287,17 +292,15 @@ public class GameServlet extends HttpServlet {
           List<Movement> winners = (List<Movement>)context.getAttribute(WINNERS);
           // if more than one black player, pick only one with shortest movement duration
           long shortestDuration = Long.MAX_VALUE;
-          Movement winner = null;
           for(Movement move : winners) {
             if(move.getDuration() < shortestDuration) {
               winner = move;
             }
           } 
+          LOGGER.debug("Game over, winner: " + winner);
           
           JSONArray jsonWinningList = new JSONArray();
           jsonWinningList.add(winner.getPlayerId());
-
-          LOGGER.debug("****************** Game over, winner: " + winner);
           jsonResponse.put("movementFrom", "");
           jsonResponse.put("movementTo", "");
           jsonResponse.put("winningPlayers", jsonWinningList);
@@ -340,20 +343,20 @@ public class GameServlet extends HttpServlet {
         
         // winner as WHITE player for the next match (if end of game)
         if(gameOver) {
-          // TODO Finish
-          LOGGER.debug("Game over. Write winner as WHITE player to database: " );
+          LOGGER.debug("End of game. Write winner as WHITE player to database: " );
+          try {
+            Player winPlayer = playerService.find(Integer.parseInt(winner.getPlayerId()));
+            LOGGER.debug("************ Player to save: " + winPlayer + " password: " + winPlayer.getPassword());
+            playerService.save(winPlayer.getUsername(), winPlayer.getPassword(), winPlayer.getColour());
+          } catch (NumberFormatException e) {
+            LOGGER.error("Parsing id: " + e.getMessage());
+          } catch (ServiceException e) {
+            LOGGER.error(e.getMessage());
+          } catch (RegistrationException e) {
+            LOGGER.error("Saving: " + e.getMessage());
+          }
         }
 
-        /*
-         * test if end of game (if there is no winning movements)
-         */
-        if(winningMovements == null || winningMovements.size() < 1) {
-          LOGGER.debug("****************** Winner is other side: " + ((helper.isTurnWhite())? "BLACK" : "WHITE"));
-        } else {
-          
-        }
-        
-        
         /*
          * send response to all players
          */
