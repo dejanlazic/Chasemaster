@@ -133,7 +133,7 @@ public class ControllerServlet extends HttpServlet implements PageConst {
     } else {
       // check request parameter(s)
       if ("loginForm".equals(logicalName)) {
-        processLoginPage();
+        processLoginPage(request);
       } else if ("login".equals(logicalName)) {
         processLogin(request, response);
       } else if ("registrationForm".equals(logicalName)) {
@@ -160,10 +160,19 @@ public class ControllerServlet extends HttpServlet implements PageConst {
   }
 
   // send login page
-  private void processLoginPage() {
+  private void processLoginPage(HttpServletRequest request) {
     LOGGER.info("Login page sending");
-    // TODO: Check (session) if the user is not already logged in
-    destinationPage = LOGIN_PAGE;
+
+    // Display page if num of logged in users has not reach specified maximum number of players
+    Map<String, Player> loggedPlayers = (Map<String, Player>) session.getAttribute("players");
+    int maxPlayers = Integer.parseInt((String) context.getAttribute(INIT_PARAM_PLAYERS_NUM));
+    LOGGER.debug("*************** " + loggedPlayers + ", " + maxPlayers);
+    if (loggedPlayers != null && loggedPlayers.size() >= maxPlayers) {
+      request.setAttribute("errorMessage", "Number of allowed logged is exceeded");
+      destinationPage = ERROR_PAGE;
+    } else {
+      destinationPage = LOGIN_PAGE;
+    }
   }
 
   @SuppressWarnings("unchecked")
@@ -200,12 +209,19 @@ public class ControllerServlet extends HttpServlet implements PageConst {
       // check if login time is within time period after creating a new match by admin
       Date loginStart = (Date) context.getAttribute(LOGIN_BEGIN_TIME);
       Date loginEnd = (Date) context.getAttribute(LOGIN_END_TIME);
-      LOGGER.debug("********** " + loginStart + ", " + loginEnd);
       Date curTime = new Date();
+
+      // Display page if num of logged in users has not reach specified maximum number of players
+      Map<String, Player> loggedPlayers = (Map<String, Player>) session.getAttribute("players");
+      int maxPlayers = Integer.parseInt((String) context.getAttribute(INIT_PARAM_PLAYERS_NUM));
+      LOGGER.debug("*************** " + loggedPlayers + ", " + maxPlayers);
+
       if (loginStart == null || loginEnd == null) {
         request.setAttribute("errorMessage", "Login time not set yet");
       } else if (curTime.before(loginStart) || curTime.after(loginEnd)) {
         request.setAttribute("errorMessage", "Login time expired (" + loginStart + " - " + loginEnd + ")");
+      } else if (loggedPlayers != null && loggedPlayers.size() >= maxPlayers) {
+        request.setAttribute("errorMessage", "Number of allowed logged is exceeded");
       } else {
         try {
           Player player = authenticationService.login(username, password);
@@ -215,10 +231,10 @@ public class ControllerServlet extends HttpServlet implements PageConst {
             LOGGER.info("User authenticated. Player[" + player.getId() + ", " + player.getUsername() + "]");
 
             // cache userId on the client
-            Cookie cookie = new Cookie("playerId", Integer.toString(player.getId()));
-            response.addCookie(cookie);
-            request.setAttribute("playerId", Integer.toString(player.getId()));
-            LOGGER.debug("Sent cookie: " + cookie.getName() + "=" + cookie.getValue());
+            // Cookie cookie = new Cookie("playerId", Integer.toString(player.getId()));
+            // response.addCookie(cookie);
+            // request.setAttribute("playerId", Integer.toString(player.getId()));
+            // LOGGER.debug("Sent cookie: " + cookie.getName() + "=" + cookie.getValue());
 
             // cache all logged on players in session
             Map<String, Player> players = (Map<String, Player>) session.getAttribute("players");

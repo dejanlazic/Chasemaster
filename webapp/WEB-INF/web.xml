@@ -19,7 +19,7 @@
     <!-- Number of players of blaack group -->
     <init-param>
       <param-name>playersNum</param-name>
-      <param-value>2</param-value>
+      <param-value>1</param-value>
     </init-param>
     <!-- Duration for login (in minutes). 0 means immediate -->
     <init-param>
