@@ -36,25 +36,38 @@ public class AuthenticationDAOImpl extends AuthenticationDAO {
 
   @Override
   public Player authenticate(String username, String password) throws DAOException {
-    final String sql = "SELECT * FROM players WHERE username=? AND password=?";
+    final String sqlSel = "SELECT MAX(id) AS max_match_id FROM matches";
+    final String sql = "SELECT * FROM players WHERE username=? AND password=? AND match_id=?";
     Player player = null;
 
     Connection con = null;
     PreparedStatement stmt = null;
+
     try {
       con = DBUtil.getConnection();
-      stmt = con.prepareStatement(sql);
 
+      // read the latest match id
+      stmt = con.prepareStatement(sqlSel);
+      int maxMatchId = -1;
+      ResultSet rs = stmt.executeQuery();
+      if (rs != null) {
+        rs.next(); // there is only value selected, loop unnecessary
+        maxMatchId = rs.getInt("max_match_id");
+        LOGGER.info("(DB)--> Largest match id selected: maxMatchId=" + maxMatchId);
+      }
+
+      stmt = con.prepareStatement(sql);
       stmt.setString(1, username);
       stmt.setString(2, password);
+      stmt.setInt(3, maxMatchId);
 
-      ResultSet rs = stmt.executeQuery();
+      rs = stmt.executeQuery();
       if (rs != null) {
         // check if result set is empty or contains multiple records
         rs.beforeFirst();
         rs.last();
         int size = rs.getRow();
-        LOGGER.debug("(DB) --> ResultSet size: " + size);
+        LOGGER.debug("(DB)--> ResultSet size: " + size);
         if (size == 0) {
           throw new NoResultException();
         }
@@ -68,12 +81,12 @@ public class AuthenticationDAOImpl extends AuthenticationDAO {
 
         int id = rs.getInt("id");
         String uname = rs.getString("username");
-        //String pwd = rs.getString("password");
+        // String pwd = rs.getString("password");
         String colour = rs.getString("colour");
-        
+
         player = new Player(id, uname, Colour.forString(colour));
-        
-        LOGGER.info("(DB) --> User authenticated: " + player);
+
+        LOGGER.info("(DB)--> User authenticated: " + player);
       }
       con.commit();
 

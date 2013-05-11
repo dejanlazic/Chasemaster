@@ -2,6 +2,7 @@ package com.chasemaster.util;
 
 public interface GameConst {
   public static final String INIT_PARAM_PLAYERS_NUM = "playersNum";
+  public static final String INIT_PARAM_LOGIN_DURATION = "loginDuration";
   
   public static final String ADMIN_USERNAME = "adminUsername";
   public static final String ADMIN_PASSWORD = "adminPassword";
@@ -23,4 +24,6 @@ public interface GameConst {
   public static final String CHESSBOARD_IMAGES = "boardImages";
   public static final String MATCH_ID = "matchId";
   public static final String WINNERS = "winners";
+  public static final String LOGIN_BEGIN_TIME = "login_begin";
+  public static final String LOGIN_END_TIME = "login_end";
 }

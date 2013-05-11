@@ -101,7 +101,7 @@ public class PlayerDAOImpl extends PlayerDAO {
     try {
       con = DBUtil.getConnection();
 
-      // read latest match id
+      // read the latest match id
       stmt = con.prepareStatement(sqlSel);
       int maxMatchId = -1;
       ResultSet rs = stmt.executeQuery();

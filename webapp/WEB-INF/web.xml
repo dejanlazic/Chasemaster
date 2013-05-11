@@ -16,10 +16,16 @@
     <servlet-class>com.chasemaster.web.ControllerServlet</servlet-class>
 
     <!-- Game settings -->
+    <!-- Number of players of blaack group -->
     <init-param>
       <param-name>playersNum</param-name>
       <param-value>2</param-value>
     </init-param>
+    <!-- Duration for login (in minutes). 0 means immediate -->
+    <init-param>
+      <param-name>loginDuration</param-name>
+      <param-value>1</param-value>
+    </init-param>    
     <!-- Game administrator -->
     <init-param>
       <param-name>adminUsername</param-name>

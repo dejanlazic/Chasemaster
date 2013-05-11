@@ -3,9 +3,9 @@ package com.chasemaster.web;
 import static com.chasemaster.util.GameConst.*;
 
 import java.io.*;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.*;
@@ -17,7 +17,6 @@ import com.chasemaster.exception.LoginException;
 import com.chasemaster.exception.RegistrationException;
 import com.chasemaster.persistence.db.DBConfig;
 import com.chasemaster.persistence.db.DBUtil;
-import com.chasemaster.persistence.model.Match;
 import com.chasemaster.persistence.model.Player;
 import com.chasemaster.service.AuthenticationService;
 import com.chasemaster.service.GameService;
@@ -57,6 +56,9 @@ public class ControllerServlet extends HttpServlet implements PageConst {
     // the initial number of group players
     context.setAttribute(INIT_PARAM_PLAYERS_NUM, config.getInitParameter(INIT_PARAM_PLAYERS_NUM));
     LOGGER.debug(INIT_PARAM_PLAYERS_NUM + ": " + context.getAttribute(INIT_PARAM_PLAYERS_NUM));
+    // duration for login
+    context.setAttribute(INIT_PARAM_LOGIN_DURATION, config.getInitParameter(INIT_PARAM_LOGIN_DURATION));
+    LOGGER.debug(INIT_PARAM_LOGIN_DURATION + ": " + context.getAttribute(INIT_PARAM_LOGIN_DURATION));
 
     // game administrator
     context.setAttribute(ADMIN_USERNAME, config.getInitParameter(ADMIN_USERNAME));
@@ -195,36 +197,47 @@ public class ControllerServlet extends HttpServlet implements PageConst {
      */
 
     if (!isAdmin) {
-      try {
-        Player player = authenticationService.login(username, password);
-        if (player == null) {
-          request.setAttribute("errorMessage", "Unknown error. Please contact system administrator.");
-        } else {
-          LOGGER.info("User authenticated. Player[" + player.getId() + ", " + player.getUsername() + "]");
+      // check if login time is within time period after creating a new match by admin
+      Date loginStart = (Date) context.getAttribute(LOGIN_BEGIN_TIME);
+      Date loginEnd = (Date) context.getAttribute(LOGIN_END_TIME);
+      LOGGER.debug("********** " + loginStart + ", " + loginEnd);
+      Date curTime = new Date();
+      if (loginStart == null || loginEnd == null) {
+        request.setAttribute("errorMessage", "Login time not set yet");
+      } else if (curTime.before(loginStart) || curTime.after(loginEnd)) {
+        request.setAttribute("errorMessage", "Login time expired (" + loginStart + " - " + loginEnd + ")");
+      } else {
+        try {
+          Player player = authenticationService.login(username, password);
+          if (player == null) {
+            request.setAttribute("errorMessage", "Unknown error. Please contact system administrator.");
+          } else {
+            LOGGER.info("User authenticated. Player[" + player.getId() + ", " + player.getUsername() + "]");
 
-          // cache userId on the client
-          Cookie cookie = new Cookie("playerId", Integer.toString(player.getId()));
-          response.addCookie(cookie);
-          request.setAttribute("playerId", Integer.toString(player.getId()));
-          LOGGER.debug("Sent cookie: " + cookie.getName() + "=" + cookie.getValue());
+            // cache userId on the client
+            Cookie cookie = new Cookie("playerId", Integer.toString(player.getId()));
+            response.addCookie(cookie);
+            request.setAttribute("playerId", Integer.toString(player.getId()));
+            LOGGER.debug("Sent cookie: " + cookie.getName() + "=" + cookie.getValue());
 
-          // cache all logged on players in session
-          Map<String, Player> players = (Map<String, Player>) session.getAttribute("players");
-          if (players == null) {
-            LOGGER.debug("No players in session, creating new players map");
-            players = new HashMap<String, Player>();
+            // cache all logged on players in session
+            Map<String, Player> players = (Map<String, Player>) session.getAttribute("players");
+            if (players == null) {
+              LOGGER.debug("No players in session, creating new players map");
+              players = new HashMap<String, Player>();
+            }
+            players.put(Integer.toString(player.getId()), player);
+            session.setAttribute("players", players);
+            LOGGER.debug("Players map put in session, size: " + players.size());
+
+            destinationPage = GAME_PAGE;
           }
-          players.put(Integer.toString(player.getId()), player);
-          session.setAttribute("players", players);
-          LOGGER.debug("Players map put in session, size: " + players.size());
-
-          destinationPage = GAME_PAGE;
+        } catch (ServiceException e) {
+          // TODO Do something to fix this
+          request.setAttribute("errorMessage", e.getMessage());
+        } catch (LoginException e) {
+          request.setAttribute("errorMessage", e.getMessage());
         }
-      } catch (ServiceException e) {
-        // TODO Do something to fix this
-        request.setAttribute("errorMessage", e.getMessage());
-      } catch (LoginException e) {
-        request.setAttribute("errorMessage", e.getMessage());
       }
     }
   }
@@ -263,7 +276,7 @@ public class ControllerServlet extends HttpServlet implements PageConst {
 
     // retrieve a match for given id
     try {
-      if(matchId != null) {
+      if (matchId != null) {
         request.setAttribute("match", gameService.getMatch(Integer.parseInt(matchId)));
         request.setAttribute("matchesList", gameService.getMatches());
         destinationPage = ADMIN_PAGE;
@@ -280,10 +293,21 @@ public class ControllerServlet extends HttpServlet implements PageConst {
   private void processCreateMatch(HttpServletRequest request) {
     LOGGER.info("Creating new match");
 
-    // creates new match and retrieves all existing matches
     try {
+      // creates new match and retrieves all existing matches
       gameService.saveMatch(new Date());
       request.setAttribute("matchesList", gameService.getMatches());
+      // sets current time as login begin time and current time plus configured duration for login end
+      Date curDate = new Date();
+      Calendar curCal = Calendar.getInstance();
+      curCal.setTime(curDate);
+      int loginDuration = Integer.parseInt((String) context.getAttribute(INIT_PARAM_LOGIN_DURATION));
+      curCal.add(Calendar.MINUTE, loginDuration);
+      context.setAttribute(LOGIN_BEGIN_TIME, curDate);
+      context.setAttribute(LOGIN_END_TIME, curCal.getTime());
+      LOGGER.debug(LOGIN_BEGIN_TIME + ": " + curDate);
+      LOGGER.debug(LOGIN_END_TIME + ": " + curCal.getTime());
+
       destinationPage = ADMIN_PAGE;
     } catch (ServiceException e) {
       request.setAttribute("errorMessage", e.getMessage());
