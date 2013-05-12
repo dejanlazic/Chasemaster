@@ -56,9 +56,12 @@ public class ControllerServlet extends HttpServlet implements PageConst {
     // the initial number of group players
     context.setAttribute(INIT_PARAM_PLAYERS_NUM, config.getInitParameter(INIT_PARAM_PLAYERS_NUM));
     LOGGER.debug(INIT_PARAM_PLAYERS_NUM + ": " + context.getAttribute(INIT_PARAM_PLAYERS_NUM));
-    // duration for login
+    // duration for login (in minutes)
     context.setAttribute(INIT_PARAM_LOGIN_DURATION, config.getInitParameter(INIT_PARAM_LOGIN_DURATION));
     LOGGER.debug(INIT_PARAM_LOGIN_DURATION + ": " + context.getAttribute(INIT_PARAM_LOGIN_DURATION));
+    // duration for performing movement (in seconds)
+    context.setAttribute(INIT_PARAM_MOVE_DURATION, config.getInitParameter(INIT_PARAM_MOVE_DURATION));
+    LOGGER.debug(INIT_PARAM_MOVE_DURATION + ": " + context.getAttribute(INIT_PARAM_MOVE_DURATION));
 
     // game administrator
     context.setAttribute(ADMIN_USERNAME, config.getInitParameter(ADMIN_USERNAME));
@@ -104,6 +107,18 @@ public class ControllerServlet extends HttpServlet implements PageConst {
     helper = new GameHelper(context);
 
     context.setAttribute(CHESSBOARD_IMAGES, helper.getBoardImages());
+
+    // ***************** REMOVE IN PRODUCTION ***********************
+    // TO AVOID CREATING NEW MATCH EVERY TIME, TEST PURPOSES
+    // Date curDate = new Date();
+    // Calendar curCal = Calendar.getInstance();
+    // curCal.setTime(curDate);
+    // curCal.add(Calendar.MINUTE, Integer.MAX_VALUE);
+    // context.setAttribute(LOGIN_BEGIN_TIME, curDate);
+    // context.setAttribute(LOGIN_END_TIME, curCal.getTime());
+    // LOGGER.debug(LOGIN_BEGIN_TIME + ": " + curDate);
+    // LOGGER.debug(LOGIN_END_TIME + ": " + curCal.getTime());
+    // **************************************************************
   }
 
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -163,16 +178,7 @@ public class ControllerServlet extends HttpServlet implements PageConst {
   private void processLoginPage(HttpServletRequest request) {
     LOGGER.info("Login page sending");
 
-    // Display page if num of logged in users has not reach specified maximum number of players
-    Map<String, Player> loggedPlayers = (Map<String, Player>) session.getAttribute("players");
-    int maxPlayers = Integer.parseInt((String) context.getAttribute(INIT_PARAM_PLAYERS_NUM));
-    LOGGER.debug("*************** " + loggedPlayers + ", " + maxPlayers);
-    if (loggedPlayers != null && loggedPlayers.size() >= maxPlayers) {
-      request.setAttribute("errorMessage", "Number of allowed logged is exceeded");
-      destinationPage = ERROR_PAGE;
-    } else {
-      destinationPage = LOGIN_PAGE;
-    }
+    destinationPage = LOGIN_PAGE;
   }
 
   @SuppressWarnings("unchecked")
@@ -212,16 +218,19 @@ public class ControllerServlet extends HttpServlet implements PageConst {
       Date curTime = new Date();
 
       // Display page if num of logged in users has not reach specified maximum number of players
-      Map<String, Player> loggedPlayers = (Map<String, Player>) session.getAttribute("players");
-      int maxPlayers = Integer.parseInt((String) context.getAttribute(INIT_PARAM_PLAYERS_NUM));
-      LOGGER.debug("*************** " + loggedPlayers + ", " + maxPlayers);
+      Map<String, Player> loggedInPlayers = (Map<String, Player>) session.getAttribute("players");
+      int loggedInBlackPlayersNum = 0;
+      if(loggedInPlayers != null) {
+        loggedInBlackPlayersNum = loggedInPlayers.size() - 1;
+      }
+      int maxBlackPlayersNum = Integer.parseInt((String) context.getAttribute(INIT_PARAM_PLAYERS_NUM));
 
       if (loginStart == null || loginEnd == null) {
         request.setAttribute("errorMessage", "Login time not set yet");
       } else if (curTime.before(loginStart) || curTime.after(loginEnd)) {
         request.setAttribute("errorMessage", "Login time expired (" + loginStart + " - " + loginEnd + ")");
-      } else if (loggedPlayers != null && loggedPlayers.size() >= maxPlayers) {
-        request.setAttribute("errorMessage", "Number of allowed logged is exceeded");
+      } else if (loggedInPlayers != null && loggedInBlackPlayersNum >= maxBlackPlayersNum) {
+        request.setAttribute("errorMessage", "Number of allowed logged in players is exceeded");
       } else {
         try {
           Player player = authenticationService.login(username, password);
@@ -230,11 +239,9 @@ public class ControllerServlet extends HttpServlet implements PageConst {
           } else {
             LOGGER.info("User authenticated. Player[" + player.getId() + ", " + player.getUsername() + "]");
 
-            // cache userId on the client
-            // Cookie cookie = new Cookie("playerId", Integer.toString(player.getId()));
-            // response.addCookie(cookie);
-            // request.setAttribute("playerId", Integer.toString(player.getId()));
-            // LOGGER.debug("Sent cookie: " + cookie.getName() + "=" + cookie.getValue());
+            // cache playerId on the client
+            request.setAttribute("playerId", Integer.toString(player.getId()));
+            LOGGER.debug("Sent playerId: " + Integer.toString(player.getId()));
 
             // cache all logged on players in session
             Map<String, Player> players = (Map<String, Player>) session.getAttribute("players");
@@ -318,7 +325,11 @@ public class ControllerServlet extends HttpServlet implements PageConst {
       Calendar curCal = Calendar.getInstance();
       curCal.setTime(curDate);
       int loginDuration = Integer.parseInt((String) context.getAttribute(INIT_PARAM_LOGIN_DURATION));
-      curCal.add(Calendar.MINUTE, loginDuration);
+      if (loginDuration == 0) {
+        curCal.add(Calendar.MINUTE, Integer.MAX_VALUE);
+      } else {
+        curCal.add(Calendar.MINUTE, loginDuration);
+      }
       context.setAttribute(LOGIN_BEGIN_TIME, curDate);
       context.setAttribute(LOGIN_END_TIME, curCal.getTime());
       LOGGER.debug(LOGIN_BEGIN_TIME + ": " + curDate);

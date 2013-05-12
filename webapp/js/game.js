@@ -5,20 +5,19 @@ var _board;
 var _debug;
 var _message;
 var _hiddenPlayerId;
+//var _checkMate;
 var left;
 var top;
 
 function init() {
-  // alert("In init()");
-
-  // _board = document.getElementById("board");
-  _board = document.getElementById("row8");
-  _debug = document.getElementById("debug");
+  _board = document.getElementById("board");
+  // _debug = document.getElementById("debug");
   _message = document.getElementById("message");
   _hiddenPlayerId = document.getElementById("playerid");
+  //_checkMate = document.getElementById("checkMate");
 
-  _debug.innerHTML = _debug.innerHTML + "<br/>In init()";
-  _debug.innerHTML = _debug.innerHTML + "<br/>hiddenPlayerId=" + _hiddenPlayerId.value;
+  // _debug.innerHTML = _debug.innerHTML + "<br/>In init()";
+  // _debug.innerHTML = _debug.innerHTML + "<br/>hiddenPlayerId=" + _hiddenPlayerId.value;
 
   initDragDrop();
 }
@@ -48,8 +47,10 @@ var offsetX = 0;
 var offsetY = 0;
 
 function initDragDrop() {
-  document.onmousedown = onMouseDown;
-  document.onmouseup = onMouseUp;
+  // document.onmousedown = onMouseDown;
+  // document.onmouseup = onMouseUp;
+  _board.onmousedown = onMouseDown;
+  _board.onmouseup = onMouseUp;
 }
 
 function onMouseDown(e) {
@@ -69,34 +70,36 @@ function onMouseDown(e) {
   // IE uses srcElement, others use target
   var target = e.target != null ? e.target : e.srcElement;
 
-  // grab the clicked element's position
-  offsetX = extractNumber(target.style.left);
-  offsetY = extractNumber(target.style.top);
+  if (target.parentNode.parentNode.id == 'board') {
+    // grab the clicked element's position
+    offsetX = extractNumber(target.style.left);
+    offsetY = extractNumber(target.style.top);
 
-  _debug.innerHTML = _debug.innerHTML + "<br/>In onMouseDown(): " + target.id + ": " + startX + "," + startY + " - "
-      + offsetX + "," + offsetY;
+    // _debug.innerHTML = _debug.innerHTML + "<br/>In onMouseDown(): " + target.id + ": " + startX + "," + startY + " -
+    // " + offsetX + "," + offsetY;
 
-  // if ((e.button == 1 && window.event != null || e.button == 0) && target.className == 'drag') {
-  if (e.button == 1 && window.event != null || e.button == 0) {
-    document.onmousemove = onMouseMove;
+    // if ((e.button == 1 && window.event != null || e.button == 0) && target.className == 'drag') {
+    if (e.button == 1 && window.event != null || e.button == 0) {
+      document.onmousemove = onMouseMove;
 
-    if (movesCount == 0) {
-      positionFrom = target.id;
-      movesCount = 1;
-    } else {
-      _message.innerHTML = "ERROR detected in onMouseDown()";
+      if (movesCount == 0) {
+        positionFrom = target.id;
+        movesCount = 1;
+      } else {
+        _message.innerHTML = "ERROR detected in onMouseDown()";
+      }
+
+      // prevent text selection in IE
+      document.onselectstart = function() {
+        return false;
+      };
+      // prevent IE from trying to drag an image
+      target.ondragstart = function() {
+        return false;
+      };
+
+      return false;
     }
-
-    // prevent text selection in IE
-    document.onselectstart = function() {
-      return false;
-    };
-    // prevent IE from trying to drag an image
-    target.ondragstart = function() {
-      return false;
-    };
-
-    return false;
   }
 }
 
@@ -115,33 +118,28 @@ function onMouseUp(e) {
 
   // IE uses srcElement, others use target
   var target = e.target != null ? e.target : e.srcElement;
-  _debug.innerHTML = _debug.innerHTML + "<br/>In onMouseUp(): " + target.id + ": " + e.clientX + "," + e.clientY;
+  // _debug.innerHTML = _debug.innerHTML + "<br/>In onMouseUp(): " + target.id + ": " + e.clientX + "," + e.clientY;
 
-  if (movesCount == 1) {
-    positionTo = target.id;
-    movesCount = 0; // reset counter
+  if (target.parentNode.parentNode.id == 'board') {
+    if (movesCount == 1) {
+      positionTo = target.id;
+      movesCount = 0; // reset counter
 
-    _debug.innerHTML = _debug.innerHTML + "<br/>In onMouseUp, calling sendMovement(" + positionFrom + ", " + positionTo
-        + ")";
+      // _debug.innerHTML = _debug.innerHTML + "<br/>In onMouseUp, calling sendMovement(" + positionFrom + ", " +
+      // positionTo + ")";
 
-    moved = true;
+      moved = true;
 
-    // var _nodes = _board.getElementsByTagName('*');
-    // for(var i=0; i<_nodes.length; i++) {
-    // _nodes[i].disabled = true;
-    // _nodes[i].innerHTML = "X";
-    // _nodes[i].visible = false;
-    // }
+      // send a movements
+      sendMovement();
+    } else {
+      _message.innerHTML = "ERROR detected in OnMouseUp()";
+    }
 
-    // send a movements
-    sendMovement();
-  } else {
-    _message.innerHTML = "ERROR detected in OnMouseUp()";
+    // we're done with these events until the next OnMouseDown
+    document.onmousemove = null;
+    document.onselectstart = null;
   }
-
-  // we're done with these events until the next OnMouseDown
-  document.onmousemove = null;
-  document.onselectstart = null;
 }
 
 function extractNumber(value) {
@@ -153,7 +151,7 @@ function extractNumber(value) {
 /* AJAX */
 
 function sendMovement() {
-  _debug.innerHTML = _debug.innerHTML + "<br/>In sendMovement(" + positionFrom + ", " + positionTo + ")";
+  // _debug.innerHTML = _debug.innerHTML + "<br/>In sendMovement(" + positionFrom + ", " + positionTo + ")";
   var d = new Date();
   var tms = d.getTime(); // in milliseconds
   // var tutc = d.toUTCString();
@@ -179,9 +177,9 @@ function sendMovement() {
   // xmlRequest.onreadystatechange = callback;
   // xmlRequest.send(null);
 
-  //moved = false;
-  xmlRequest.send("operation=move&positionFrom=" + escape(positionFrom) + "&positionTo=" + escape(positionTo)
-      + "&playerid=" + escape(_hiddenPlayerId.value) + "&tms=" + escape(tms));
+  // moved = false;
+  xmlRequest.send("operation=move&positionFrom=" + escape(positionFrom) + "&positionTo=" + escape(positionTo) + "&playerid="
+      + escape(_hiddenPlayerId.value) + "&tms=" + escape(tms));
 }
 
 function clearPositions() {
@@ -192,7 +190,9 @@ function clearPositions() {
 
 function deInit() {
   alert('Out of game (player id: ' + _hiddenPlayerId.value + ')');
-  
-  document.onmousedown = null;
-  document.onmouseup = null;
+
+//  document.onmousedown = null;
+//  document.onmouseup = null;
+  _board.onmousedown = null;
+  _board.onmouseup = null;  
 }

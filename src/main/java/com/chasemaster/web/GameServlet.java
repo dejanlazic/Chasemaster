@@ -134,15 +134,19 @@ public class GameServlet extends HttpServlet {
       String positionTo = request.getParameter("positionTo");
       String t = request.getParameter("t");
       LOGGER.debug("Parameter - time: " + t);
-      String tms = request.getParameter("tms");
-      long endTimeMS = Long.parseLong(tms);
-      LOGGER.debug("End time: " + endTimeMS);
       Date startTime = (Date) context.getAttribute(START_TIME);
       long startTimeMS = startTime.getTime();
       LOGGER.debug("Start time: " + startTimeMS);
-      LOGGER.debug("Duration: " + (endTimeMS - startTimeMS));
+      String tms = request.getParameter("tms");
+      long endTimeMS = Long.parseLong(tms);
+      LOGGER.debug("End time: " + endTimeMS);
+      long duration = endTimeMS - startTimeMS;
+      LOGGER.debug("Duration: " + duration);
       String playerId = request.getParameter("playerid"); // from hidden field
       LOGGER.debug("playerId=" + playerId + ": " + positionFrom + "," + positionTo);
+      //String mate = request.getParameter("checkMate");
+      //Boolean checkMate = (mate.equals("true")? true : false);
+      //LOGGER.debug("checkMate=" + checkMate);
 
       // Chess objects
       Location locationFrom = Location.forString(positionFrom);
@@ -160,20 +164,6 @@ public class GameServlet extends HttpServlet {
       Player player = players.get(playerId);
       LOGGER.debug("Logged on player (in session): " + player);
 
-      // Map<String, String> playerMovementPairs = null;
-      // ServletContext context = request.getSession().getServletContext();
-      // if (context.getAttribute("playerMovementPairs") == null) {
-      // LOGGER.debug("---> In POST: creating new playerMovementPairs");
-      // playerMovementPairs = new HashMap<String, String>();
-      // } else {
-      // LOGGER.debug("---> In POST: playerMovementPairs exists");
-      // playerMovementPairs = (Map<String, String>) context.getAttribute("playerMovementPairs");
-      // }
-      // if(playerMovementPairs != null) {
-      // playerMovementPairs.put(playerId, positionTo);
-      // context.setAttribute("playerMovementPairs", playerMovementPairs);
-      // }
-
       /*
        * check if movement is valid before putting it in a map
        */
@@ -181,7 +171,14 @@ public class GameServlet extends HttpServlet {
           + failedPlayerMovementPairs.size());
       if ((helper.isTurnWhite() && player.isWhite()) || (!helper.isTurnWhite() && !player.isWhite())) {
         if (helper.isMovementValid(locationFrom, locationTo)) {
-          playerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS - startTimeMS, playerId));
+          // movement is invalid if it exceeds defined duration time
+          long maxDuration = Long.parseLong((String)context.getAttribute(INIT_PARAM_MOVE_DURATION));
+          LOGGER.debug("duration=" + duration/1000 + ", maxDuration=" + maxDuration);
+          if((duration/1000) < maxDuration) {
+            playerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS - startTimeMS, playerId));
+          } else {
+            failedPlayerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS - startTimeMS, playerId));
+          }
         } else {
           failedPlayerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS - startTimeMS, playerId));
         }
@@ -379,7 +376,11 @@ public class GameServlet extends HttpServlet {
           helper.changeTurn(); // switch colour for the next turn
           playerMovementPairs.clear(); // clear lists of performed movements
           failedPlayerMovementPairs.clear();
-          context.setAttribute(START_TIME, new Date()); // reset start time
+          // reset start time
+          context.setAttribute(START_TIME, new Date());
+          // set by a player and put into session - 
+          // will be checked during next turn of opposite side whether it is true or not
+          //context.setAttribute(CHECK_MATE, checkMate);
         } catch (NoObjectInContextException e) {
           // TODO FATAL system error (check code) - exit the game
           LOGGER.error("Object " + e.getMessage() + " not found in context");
