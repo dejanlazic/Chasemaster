@@ -107,18 +107,6 @@ public class ControllerServlet extends HttpServlet implements PageConst {
     helper = new GameHelper(context);
 
     context.setAttribute(CHESSBOARD_IMAGES, helper.getBoardImages());
-
-    // ***************** REMOVE IN PRODUCTION ***********************
-    // TO AVOID CREATING NEW MATCH EVERY TIME, TEST PURPOSES
-    // Date curDate = new Date();
-    // Calendar curCal = Calendar.getInstance();
-    // curCal.setTime(curDate);
-    // curCal.add(Calendar.MINUTE, Integer.MAX_VALUE);
-    // context.setAttribute(LOGIN_BEGIN_TIME, curDate);
-    // context.setAttribute(LOGIN_END_TIME, curCal.getTime());
-    // LOGGER.debug(LOGIN_BEGIN_TIME + ": " + curDate);
-    // LOGGER.debug(LOGIN_END_TIME + ": " + curCal.getTime());
-    // **************************************************************
   }
 
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

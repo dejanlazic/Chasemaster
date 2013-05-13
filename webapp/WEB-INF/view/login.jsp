@@ -26,13 +26,13 @@
                 <td>Username</td>
               </tr>
               <tr>
-                <td><input id="username" name="username" value="player01" /></td>
+                <td><input type="text" id="username" name="username"/></td>
               </tr>
               <tr>
                 <td>Password</td>
               </tr>
               <tr>
-                <td><input id="password" name="password" value="player01" /></td>
+                <td><input type="password" id="password" name="password"/></td>
               </tr>
               <tr>
                 <td><p id="message" style="color:red;"></p></td>

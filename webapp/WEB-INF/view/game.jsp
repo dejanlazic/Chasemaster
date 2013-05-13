@@ -122,9 +122,8 @@
 
           <tr>
             <!-- Testing column - Use it later for table with users and their movements  -->
-            <td>
-                <!-- input type="checkbox" id="checkMate" value="A"><b>Check mate</b -->
-                <input type="hidden" id="playerid" name="playerid" value="${requestScope.playerId}" />
+            <td>                
+                User ID: <b><input id="playerid" name="playerid" value="${requestScope.playerId}" readonly="readonly"/></b>
                <!-- p id="debug"></p -->
             </td>
           </tr>
@@ -198,13 +197,12 @@
                         content += '<br/>Game over? ' + data.gameOver;
                         
                         document.getElementById("message").innerHTML = content;
-
+                        
                         // move icon on the board
                         var _imgFrom = document.getElementById(movementFrom).style.backgroundImage;                        
-                        //alert(_imgFrom);
                         document.getElementById(movementTo).style.backgroundImage = _imgFrom;
                         document.getElementById(movementFrom).style.backgroundImage = null;
-                        
+
                         return false;
                     }
                 }

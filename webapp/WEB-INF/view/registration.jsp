@@ -15,22 +15,22 @@
 
 <body>
   <div id="main">
-     <h1>Registration</h1>
-
     <div class="form">
+       <h1>Registration</h1>
+
         <form method="post" action="register.do" onSubmit="return validateRegistrationForm();">
           <table>
             <tr>
               <td>Username</td>
-              <td><input id="username" name="username"/></td>
+              <td><input type="text" id="username" name="username"/></td>
             </tr>
             <tr>
               <td>Password</td>
-              <td><input id="password" name="password" /></td>
+              <td><input type="password" id="password" name="password" /></td>
             </tr>
             <tr>
               <td>Confirm Password</td>
-              <td><input id="passwordConfirmation" name="passwordConfirmation" /></td>
+              <td><input type="password" id="passwordConfirmation" name="passwordConfirmation" /></td>
             </tr>
             <tr>
               <td colspan="2"><p id="message" style="color:red;"></p></td>

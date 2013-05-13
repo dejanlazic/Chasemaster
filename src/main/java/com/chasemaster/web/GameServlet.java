@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletConfig;
@@ -20,6 +21,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import com.chasemaster.Colour;
 import com.chasemaster.exception.NoMovementException;
 import com.chasemaster.exception.NoObjectInContextException;
 import com.chasemaster.exception.RegistrationException;
@@ -62,7 +64,7 @@ public class GameServlet extends HttpServlet {
 
     context = config.getServletContext();
     helper = new GameHelper(context);
-    
+
     // current colour on move (starting with WHITE)
     context.setAttribute(TURN_WHITE, new Boolean(true));
     // this time is used to measure durations of all BLACK movements to find a group
@@ -78,11 +80,6 @@ public class GameServlet extends HttpServlet {
       // Note: DB conn and DAO configured in web.xml and ControllerServlet
       gameService = new GameService();
       playerService = new PlayerService();
-    } catch (ServiceException e) {
-      LOGGER.error(e.getMessage());
-    }
-    
-    try {
       Integer maxMatchId = gameService.getMaxMatchId(); // retrieve current match id
       context.setAttribute(MATCH_ID, maxMatchId);
     } catch (ServiceException e) {
@@ -144,9 +141,9 @@ public class GameServlet extends HttpServlet {
       LOGGER.debug("Duration: " + duration);
       String playerId = request.getParameter("playerid"); // from hidden field
       LOGGER.debug("playerId=" + playerId + ": " + positionFrom + "," + positionTo);
-      //String mate = request.getParameter("checkMate");
-      //Boolean checkMate = (mate.equals("true")? true : false);
-      //LOGGER.debug("checkMate=" + checkMate);
+      // String mate = request.getParameter("checkMate");
+      // Boolean checkMate = (mate.equals("true")? true : false);
+      // LOGGER.debug("checkMate=" + checkMate);
 
       // Chess objects
       Location locationFrom = Location.forString(positionFrom);
@@ -172,9 +169,9 @@ public class GameServlet extends HttpServlet {
       if ((helper.isTurnWhite() && player.isWhite()) || (!helper.isTurnWhite() && !player.isWhite())) {
         if (helper.isMovementValid(locationFrom, locationTo)) {
           // movement is invalid if it exceeds defined duration time
-          long maxDuration = Long.parseLong((String)context.getAttribute(INIT_PARAM_MOVE_DURATION));
-          LOGGER.debug("duration=" + duration/1000 + ", maxDuration=" + maxDuration);
-          if((duration/1000) < maxDuration) {
+          long maxDuration = Long.parseLong((String) context.getAttribute(INIT_PARAM_MOVE_DURATION));
+          LOGGER.debug("duration=" + duration / 1000 + ", maxDuration=" + maxDuration);
+          if ((duration / 1000) < maxDuration) {
             playerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS - startTimeMS, playerId));
           } else {
             failedPlayerMovementPairs.put(playerId, new Movement(piece, locationFrom, locationTo, endTimeMS - startTimeMS, playerId));
@@ -202,7 +199,7 @@ public class GameServlet extends HttpServlet {
         try {
           helper.findWinningMovements(winningMovements, losingMovements, playerMovementPairs, failedPlayerMovementPairs);
         } catch (NoMovementException e1) {
-          //gameOver = true;
+          // gameOver = true;
         }
 
         LOGGER.debug("Determined winning movements: " + winningMovements);
@@ -213,7 +210,7 @@ public class GameServlet extends HttpServlet {
           numberOfActivePlayers = winningMovements.size();
           LOGGER.debug("numberOfActivePlayers changed: " + numberOfActivePlayers);
         }
-        
+
         Movement winner = null;
         JSONObject jsonResponse = new JSONObject();
 
@@ -284,18 +281,41 @@ public class GameServlet extends HttpServlet {
            * end of game
            */
           gameOver = true;
-          
+
           // take previous' turn winners
-          List<Movement> winners = (List<Movement>)context.getAttribute(WINNERS);
-          // if more than one black player, pick only one with shortest movement duration
+          List<Movement> winners = (List<Movement>) context.getAttribute(WINNERS);
+
+          // if WHITE makes a fault movement as his first movement,
+          // application will try to find a winner in a list of previous winners
+          // but that list will be empty - so populate it here with all signed in black players
+          // and put random times for their movement duration, so random player will be chosen
+          // as a winner
+          if (winners == null) {
+            Random r = new Random();
+            Map<String, Player> loggedInPlayers = (Map<String, Player>) session.getAttribute("players");
+            List<Movement> wm = new ArrayList<Movement>();
+            for (Map.Entry<String, Player> entry : loggedInPlayers.entrySet()) {
+              Player p = entry.getValue();
+              if (p.getColour() == Colour.BLACK) {
+                Movement m = new Movement(-1);
+                m.setDuration(Long.valueOf(r.nextInt()));
+                m.setPlayerId(Integer.toString(p.getId()));
+                wm.add(m);
+              }
+            }
+            winners = wm;
+            context.setAttribute(WINNERS, wm);
+          }
+
+          // if more than one black player in game, pick only one with shortest movement duration
           long shortestDuration = Long.MAX_VALUE;
-          for(Movement move : winners) {
-            if(move.getDuration() < shortestDuration) {
+          for (Movement move : winners) {
+            if (move.getDuration() < shortestDuration) {
               winner = move;
             }
-          } 
+          }
           LOGGER.debug("Game over, winner: " + winner);
-          
+
           JSONArray jsonWinningList = new JSONArray();
           jsonWinningList.add(winner.getPlayerId());
           jsonResponse.put("movementFrom", "");
@@ -323,27 +343,25 @@ public class GameServlet extends HttpServlet {
           winningList.add(winningMovement.getPlayerId());
         }
         try {
-          int turnId = gameService.saveTurn(((Integer) context.getAttribute(MATCH_ID)), 
-              (helper.isTurnWhite() ? "WHITE" : "BLACK"), winningList);
+          int turnId = gameService.saveTurn(((Integer) context.getAttribute(MATCH_ID)), (helper.isTurnWhite() ? "WHITE" : "BLACK"), winningList);
 
           for (Movement winningMovement : winningMovements) {
-            gameService.saveMovement(turnId, Integer.parseInt(winningMovement.getPlayerId()), 
-                winningMovement.getFrom().toString(), winningMovement.getTo().toString(), winningMovement.getDuration());
+            gameService.saveMovement(turnId, Integer.parseInt(winningMovement.getPlayerId()), winningMovement.getFrom().toString(), winningMovement
+                .getTo().toString(), winningMovement.getDuration());
           }
           for (Movement losingMovement : losingMovements) {
-            gameService.saveMovement(turnId, Integer.parseInt(losingMovement.getPlayerId()), 
-                losingMovement.getFrom().toString(), losingMovement.getTo().toString(), losingMovement.getDuration());
+            gameService.saveMovement(turnId, Integer.parseInt(losingMovement.getPlayerId()), losingMovement.getFrom().toString(), losingMovement
+                .getTo().toString(), losingMovement.getDuration());
           }
         } catch (ServiceException se) {
           LOGGER.error(se.getMessage());
         }
-        
+
         // winner as WHITE player for the next match (if end of game)
-        if(gameOver) {
-          LOGGER.debug("End of game. Write winner as WHITE player to database: " );
+        if (gameOver) {
           try {
             Player winPlayer = playerService.find(Integer.parseInt(winner.getPlayerId()));
-            LOGGER.debug("************ Player to save: " + winPlayer + " password: " + winPlayer.getPassword());
+            LOGGER.debug("End of game. Write winner as WHITE player to database: " + winPlayer + " password: " + winPlayer.getPassword());
             playerService.save(winPlayer.getUsername(), winPlayer.getPassword(), winPlayer.getColour());
           } catch (NumberFormatException e) {
             LOGGER.error("Parsing id: " + e.getMessage());
@@ -378,9 +396,9 @@ public class GameServlet extends HttpServlet {
           failedPlayerMovementPairs.clear();
           // reset start time
           context.setAttribute(START_TIME, new Date());
-          // set by a player and put into session - 
+          // set by a player and put into session -
           // will be checked during next turn of opposite side whether it is true or not
-          //context.setAttribute(CHECK_MATE, checkMate);
+          // context.setAttribute(CHECK_MATE, checkMate);
         } catch (NoObjectInContextException e) {
           // TODO FATAL system error (check code) - exit the game
           LOGGER.error("Object " + e.getMessage() + " not found in context");
